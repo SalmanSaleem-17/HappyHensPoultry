@@ -13,6 +13,7 @@ const IMG = {
   eggsCloseUp: "/Brown-eggs.webp",
   eggsTray: "/brown-eggs-in-the-egg-tray-closeup-egg-dish-diet-brown.jpg",
   eggsStock: "/brown-eggs-stock-image.jpeg",
+  socialBrown: "/social-brown-eggs.webp",
   video:
     "https://res.cloudinary.com/dw6svuzvy/video/upload/v1777973345/Hens-in-Fields_fns5bt.mp4",
 };
@@ -177,7 +178,7 @@ const BLOG = [
     title: "Brown eggs are better — because of nutrition",
     excerpt:
       "Heat thing? It’s a myth. Brown eggs aren’t warmer than white — the real difference is in the diet and life behind the shell.",
-    image: IMG.eggsStock,
+    image: IMG.socialBrown,
     tag: "Nutrition",
     read: "4 min read",
   },
@@ -478,8 +479,8 @@ export default function Home() {
             </div>
 
             {/* The Egg detail strip */}
-            <div className="mt-14 sm:mt-16 lg:mt-20 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 items-stretch">
-              <div className="lg:col-span-4 aspect-16/10 lg:aspect-auto relative overflow-hidden bg-surface-2 min-h-60">
+            <div className="mt-12 sm:mt-16 lg:mt-20 grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 items-stretch">
+              <div className="lg:col-span-4 aspect-video sm:aspect-16/10 lg:aspect-auto relative overflow-hidden bg-surface-2 min-h-48 sm:min-h-60">
                 <Image
                   src={IMG.eggsCloseUp}
                   alt="A close-up pile of fresh, free-range brown eggs"
@@ -488,36 +489,36 @@ export default function Home() {
                   className="object-cover hover:scale-[1.03] transition-transform duration-700"
                 />
               </div>
-              <div className="lg:col-span-5 bg-accent text-surface p-8 sm:p-10 lg:p-14 flex flex-col justify-center">
+              <div className="lg:col-span-5 bg-accent text-surface p-6 sm:p-9 lg:p-14 flex flex-col justify-center">
                 <div className="text-[10px] uppercase tracking-[0.28em] text-highlight font-semibold">
                   ✦ The Egg
                 </div>
-                <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl mt-3 sm:mt-4 leading-[1.15]">
+                <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl mt-3 leading-[1.15]">
                   Deep brown shell.
                   <br />
                   <span className="italic">Golden, vivid yolk.</span>
                 </h3>
-                <p className="mt-4 sm:mt-5 text-surface/85 leading-relaxed text-sm sm:text-base">
+                <p className="mt-3 sm:mt-4 text-surface/85 leading-relaxed text-sm sm:text-base">
                   Larger than a typical farm egg, with a thicker shell thanks
                   to a calcium-rich, organic diet. Each one is candled by hand
                   before it leaves the farm.
                 </p>
               </div>
-              <div className="lg:col-span-3 bg-surface-2 p-8 sm:p-10 lg:p-12 grid grid-cols-2 lg:grid-cols-1 gap-6 lg:gap-0 lg:flex lg:flex-col lg:justify-between">
+              <div className="lg:col-span-3 bg-surface-2 p-6 sm:p-9 lg:p-12 grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-0 lg:flex lg:flex-col lg:justify-between">
                 <div>
-                  <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.22em] text-muted font-semibold">
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted font-semibold">
                     Avg. weight
                   </div>
-                  <div className="font-display text-4xl sm:text-5xl text-foreground mt-2 sm:mt-3 leading-none">
-                    63<span className="text-xl sm:text-2xl text-muted">g</span>
+                  <div className="font-display text-3xl sm:text-4xl lg:text-5xl text-foreground mt-2 leading-none">
+                    63<span className="text-lg sm:text-xl lg:text-2xl text-muted">g</span>
                   </div>
                 </div>
                 <div className="lg:mt-8">
-                  <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.22em] text-muted font-semibold">
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted font-semibold">
                     Yield
                   </div>
-                  <div className="font-display text-4xl sm:text-5xl text-foreground mt-2 sm:mt-3 leading-none">
-                    305<span className="text-xl sm:text-2xl text-muted">/yr</span>
+                  <div className="font-display text-3xl sm:text-4xl lg:text-5xl text-foreground mt-2 leading-none">
+                    305<span className="text-lg sm:text-xl lg:text-2xl text-muted">/yr</span>
                   </div>
                 </div>
               </div>
