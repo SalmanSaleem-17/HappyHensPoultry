@@ -7,16 +7,16 @@ export default function Hero() {
       className="relative pt-20 lg:pt-24 bg-background overflow-hidden"
     >
       {/* Soft decorative blobs for depth */}
-      <div className="absolute -top-32 -left-20 w-[28rem] h-[28rem] rounded-full bg-highlight/15 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 right-0 w-[28rem] h-[28rem] rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+      <div className="absolute -top-32 -left-20 w-md h-112 rounded-full bg-highlight/15 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 right-0 w-md h-112 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
-      <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pt-10 sm:pt-16 lg:pt-20 pb-14 lg:pb-24">
+      <div className="relative max-w-350 mx-auto px-5 sm:px-8 lg:px-12 pt-10 sm:pt-16 lg:pt-20 pb-14 lg:pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* LEFT — copy */}
           <div className="lg:col-span-6 animate-fade-in order-2 lg:order-1">
             <div className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-accent font-semibold mb-7 sm:mb-9">
               <span className="w-2 h-2 rounded-full bg-accent"></span>
-              Free Range · Lahore
+              Free Range · Jhang Sadar
             </div>
 
             <h1 className="font-display text-[clamp(2.75rem,8.4vw,6rem)] font-medium text-foreground leading-[0.95] tracking-tight text-balance">
@@ -57,7 +57,7 @@ export default function Hero() {
           <div className="lg:col-span-6 relative order-1 lg:order-2">
             <div className="relative">
               {/* Main hero image */}
-              <div className="relative aspect-[4/5] sm:aspect-[5/6] overflow-hidden bg-surface-2 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)]">
+              <div className="relative aspect-4/5 sm:aspect-5/6 overflow-hidden bg-surface-2 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)]">
                 <Image
                   src="/packaging.jpg"
                   alt="Happy Hens egg cartons styled with fresh flowers"
@@ -74,7 +74,7 @@ export default function Hero() {
               </div>
 
               {/* Floating accent card — bottom left */}
-              <div className="hidden sm:block absolute -bottom-8 -left-6 lg:-left-10 max-w-[240px] bg-surface border border-border p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.18)]">
+              <div className="hidden sm:block absolute -bottom-8 -left-6 lg:-left-10 max-w-60 bg-surface border border-border p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.18)]">
                 <div className="text-[10px] uppercase tracking-[0.22em] text-highlight font-semibold">
                   ★ 5.0
                 </div>

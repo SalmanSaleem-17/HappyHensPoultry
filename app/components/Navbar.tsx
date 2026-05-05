@@ -20,7 +20,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-surface border-b border-border">
-      <nav className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+      <nav className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
         <div className="flex items-center justify-between h-16">
           <Link
             href="#home"
@@ -42,7 +42,7 @@ export default function Navbar() {
                 Happy Hens
               </span>
               <span className="text-[9px] uppercase tracking-[0.22em] text-muted">
-                Free Range · Lahore
+                Free Range · Jhang Sadar
               </span>
             </div>
           </Link>

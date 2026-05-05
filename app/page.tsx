@@ -9,9 +9,10 @@ const IMG = {
   pkg12: "/packaging-12-eggs.jpeg",
   pkg30: "/packaging-30-eggs.jpeg",
   pkg6and12: "/packaging-6-and-12.jpeg",
-  socialBrown: "/social-brown-eggs.webp",
-  socialAnda: "/social-anda-paratha.webp",
   icon: "/icon.png",
+  eggsCloseUp: "/Brown-eggs.webp",
+  eggsTray: "/brown-eggs-in-the-egg-tray-closeup-egg-dish-diet-brown.jpg",
+  eggsStock: "/brown-eggs-stock-image.jpeg",
   video:
     "https://res.cloudinary.com/dw6svuzvy/video/upload/v1777973345/Hens-in-Fields_fns5bt.mp4",
 };
@@ -128,19 +129,19 @@ const PROCESS = [
     n: "01",
     title: "Sunrise",
     body: "The flock wakes naturally as light returns to the open sheds. No timers, no artificial cycles.",
-    image: IMG.pkg12,
+    image: "/sunrise.jpeg",
   },
   {
     n: "02",
     title: "Free range",
     body: "Hens roam, forage, dust-bathe. Their day is theirs — exactly as it should be.",
-    image: IMG.pkg6and12,
+    image: "/free-range.webp",
   },
   {
     n: "03",
     title: "Hand-collected",
     body: "Eggs are collected by our team gently, several times a day, never washed harshly.",
-    image: IMG.pkg30,
+    image: "/hand-collected.webp",
   },
   {
     n: "04",
@@ -176,16 +177,16 @@ const BLOG = [
     title: "Brown eggs are better — because of nutrition",
     excerpt:
       "Heat thing? It’s a myth. Brown eggs aren’t warmer than white — the real difference is in the diet and life behind the shell.",
-    image: IMG.socialBrown,
+    image: IMG.eggsStock,
     tag: "Nutrition",
     read: "4 min read",
   },
   {
-    title: "Anda paratha is my personality now",
+    title: "Hand-sorted, candled, sealed",
     excerpt:
-      "Expectation: New week, new me. Reality: hot paratha, runny golden yolk, every morning. We see you — and we deliver.",
-    image: IMG.socialAnda,
-    tag: "Lifestyle",
+      "A look inside our daily packing line — how we check every egg before it leaves the farm and reaches your kitchen.",
+    image: IMG.pkg30,
+    tag: "Our Process",
     read: "3 min read",
   },
   {
@@ -202,7 +203,7 @@ const CITIES = ["Lahore", "Faisalabad", "Islamabad", "Jhang"];
 
 const BREED_FACTS = [
   { label: "Origin", value: "Cuxhaven, Germany" },
-  { label: "Plumage", value: "Warm chestnut brown" },
+  { label: "Plumage", value: "Glossy black, green sheen" },
   { label: "Egg colour", value: "Rich, deep brown" },
   { label: "Egg weight", value: "62 – 64 g" },
   { label: "Annual yield", value: "~ 305 / hen" },
@@ -238,7 +239,7 @@ const PRODUCTS = [
 
 const MARQUEE = [
   "Free Range",
-  "Lohmann Brown",
+  "Lohmann Black",
   "Organic Feed",
   "Vitamin D · Omega-3",
 ];
@@ -296,7 +297,7 @@ export default function Home() {
           id="about"
           className="py-20 sm:py-28 lg:py-32 bg-surface border-y border-border"
         >
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
             <SectionHeader number="No. 02 — Our Story" right="Lahore · Pakistan" />
 
             <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
@@ -349,7 +350,7 @@ export default function Home() {
               </div>
 
               <div className="lg:col-span-3">
-                <div className="aspect-[3/4] relative overflow-hidden bg-surface-2">
+                <div className="aspect-3/4 relative overflow-hidden bg-surface-2">
                   <Image
                     src={IMG.packaging}
                     alt="Happy Hens egg cartons on a lace tablecloth"
@@ -366,18 +367,18 @@ export default function Home() {
 
             {/* Wide editorial image */}
             <figure className="mt-12 sm:mt-16">
-              <div className="aspect-[16/9] sm:aspect-[21/9] relative overflow-hidden bg-surface-2">
+              <div className="aspect-video sm:aspect-21/9 relative overflow-hidden bg-surface-2">
                 <Image
-                  src={IMG.pkg12}
-                  alt="Happy Hens dozen-tray packaging styled with fresh eggs and feathers"
+                  src={IMG.eggsTray}
+                  alt="A tray of fresh, free-range brown eggs from Happy Hens Poultry"
                   fill
                   sizes="100vw"
-                  className="object-cover hover:scale-[1.02] transition-transform duration-[1200ms]"
+                  className="object-cover hover:scale-[1.02] transition-transform duration-1200"
                 />
               </div>
               <figcaption className="mt-3 sm:mt-4 flex items-center gap-3 text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-muted font-medium">
                 <span className="w-8 h-px bg-border-strong"></span>
-                Photographed at the Raiwind Road farm · Lahore
+                Hand-collected at our Jhang Sadar farm · sorted · candled
               </figcaption>
             </figure>
           </div>
@@ -385,7 +386,7 @@ export default function Home() {
 
         {/* THE BREED — LOHMANN BROWN */}
         <section id="breed" className="py-20 sm:py-28 lg:py-32 bg-background">
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
             <SectionHeader number="No. 03 — The Breed" right="Cuxhaven · Germany" />
 
             <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
@@ -394,7 +395,7 @@ export default function Home() {
                   {/* Outer decorative frame */}
                   <div className="relative bg-surface border border-border-strong p-3 sm:p-4 lg:p-5 shadow-[0_30px_60px_-25px_rgba(0,0,0,0.25)]">
                     {/* Inner thin accent line */}
-                    <div className="relative aspect-[4/5] sm:aspect-[5/6] overflow-hidden bg-surface-2 outline outline-1 outline-offset-[6px] outline-accent/30">
+                    <div className="relative aspect-4/5 sm:aspect-5/6 overflow-hidden bg-surface-2 outline-1 outline-offset-[6px] outline-accent/30">
                       <video
                         src={IMG.video}
                         poster={IMG.packaging}
@@ -405,7 +406,7 @@ export default function Home() {
                         preload="metadata"
                         className="absolute inset-0 w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
 
                       {/* Top-left badge */}
                       <div className="absolute top-4 sm:top-5 left-4 sm:left-5 bg-surface/95 backdrop-blur-sm px-2.5 sm:px-3 py-1 sm:py-1.5 text-[9px] sm:text-[10px] uppercase tracking-[0.22em] text-foreground font-semibold flex items-center gap-2">
@@ -446,18 +447,19 @@ export default function Home() {
               <div className="lg:col-span-5 order-1 lg:order-2">
                 <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-medium text-foreground leading-[1.05] tracking-tight text-balance">
                   Meet the{" "}
-                  <span className="italic text-accent">Lohmann Brown.</span>
+                  <span className="italic text-accent">Lohmann Black.</span>
                 </h2>
                 <p className="mt-7 sm:mt-8 text-base sm:text-[17px] text-muted leading-[1.7] text-pretty">
-                  We chose the Lohmann Brown for one reason: she thrives in a
+                  We chose the Lohmann Black for one reason: she thrives in a
                   free-range life. Calm, curious and remarkably hardy, she
                   walks confidently in open sheds, forages well, and lays a
                   beautiful brown egg with a deep golden yolk.
                 </p>
                 <p className="mt-4 sm:mt-5 text-base sm:text-[17px] text-muted leading-[1.7] text-pretty">
-                  Originally bred in Cuxhaven, Germany, her warm chestnut
-                  plumage glows in the morning sun. Around our farm, we just
-                  call her one of the girls.
+                  Originally bred in Cuxhaven, Germany, her glossy black
+                  plumage carries a striking green sheen in the morning sun.
+                  Around our Jhang Sadar farm, we just call her one of the
+                  girls.
                 </p>
 
                 <div className="mt-10 sm:mt-12 grid grid-cols-2 gap-x-5 sm:gap-x-6 gap-y-6 sm:gap-y-7">
@@ -477,10 +479,10 @@ export default function Home() {
 
             {/* The Egg detail strip */}
             <div className="mt-14 sm:mt-16 lg:mt-20 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 items-stretch">
-              <div className="lg:col-span-4 aspect-[16/10] lg:aspect-auto relative overflow-hidden bg-surface-2 min-h-[240px]">
+              <div className="lg:col-span-4 aspect-16/10 lg:aspect-auto relative overflow-hidden bg-surface-2 min-h-60">
                 <Image
-                  src={IMG.pkg12}
-                  alt="Happy Hens dozen-tray packaging close up"
+                  src={IMG.eggsCloseUp}
+                  alt="A close-up pile of fresh, free-range brown eggs"
                   fill
                   sizes="(max-width: 1024px) 100vw, 33vw"
                   className="object-cover hover:scale-[1.03] transition-transform duration-700"
@@ -528,7 +530,7 @@ export default function Home() {
           id="why"
           className="py-20 sm:py-28 lg:py-32 bg-surface border-y border-border"
         >
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 mb-12 sm:mb-16 lg:mb-20 pb-6 border-b border-border">
               <div className="max-w-2xl">
                 <div className="text-[10px] uppercase tracking-[0.28em] text-muted font-semibold mb-3 sm:mb-4">
@@ -551,7 +553,7 @@ export default function Home() {
               {FEATURES.map((f) => (
                 <div
                   key={f.title}
-                  className="group bg-surface p-7 sm:p-9 lg:p-11 hover:bg-background transition-colors min-h-[240px]"
+                  className="group bg-surface p-7 sm:p-9 lg:p-11 hover:bg-background transition-colors min-h-60"
                 >
                   <div className="flex items-center justify-between mb-5">
                     <span
@@ -578,7 +580,7 @@ export default function Home() {
 
         {/* OUR PROCESS */}
         <section id="process" className="py-20 sm:py-28 lg:py-32 bg-background">
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 mb-12 sm:mb-16 lg:mb-20 pb-6 border-b border-border">
               <div className="max-w-2xl">
                 <div className="text-[10px] uppercase tracking-[0.28em] text-muted font-semibold mb-3 sm:mb-4">
@@ -597,7 +599,7 @@ export default function Home() {
                   <div className="text-[10px] uppercase tracking-[0.28em] text-accent font-semibold mb-4 sm:mb-5">
                     Step {step.n}
                   </div>
-                  <div className="aspect-[4/5] relative overflow-hidden bg-surface-2 mb-5 sm:mb-6">
+                  <div className="aspect-4/5 relative overflow-hidden bg-surface-2 mb-5 sm:mb-6">
                     <Image
                       src={step.image}
                       alt={step.title}
@@ -623,7 +625,7 @@ export default function Home() {
           id="products"
           className="py-20 sm:py-28 lg:py-32 bg-surface border-y border-border"
         >
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 mb-12 sm:mb-16 lg:mb-20 pb-6 border-b border-border">
               <div className="max-w-2xl">
                 <div className="text-[10px] uppercase tracking-[0.28em] text-muted font-semibold mb-3 sm:mb-4">
@@ -651,7 +653,7 @@ export default function Home() {
                       ★ Most Loved
                     </div>
                   )}
-                  <div className="aspect-[4/3] relative overflow-hidden bg-surface-2">
+                  <div className="aspect-4/3 relative overflow-hidden bg-surface-2">
                     <Image
                       src={p.image}
                       alt={`${p.name} — Happy Hens packaging`}
@@ -725,7 +727,7 @@ export default function Home() {
 
         {/* REVIEWS */}
         <section id="reviews" className="py-20 sm:py-28 lg:py-32 bg-background">
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 mb-12 sm:mb-16 lg:mb-20 pb-6 border-b border-border">
               <div className="max-w-2xl">
                 <div className="text-[10px] uppercase tracking-[0.28em] text-muted font-semibold mb-3 sm:mb-4">
@@ -810,7 +812,7 @@ export default function Home() {
           id="blog"
           className="py-20 sm:py-28 lg:py-32 bg-surface border-y border-border"
         >
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 mb-12 sm:mb-16 lg:mb-20 pb-6 border-b border-border">
               <div className="max-w-xl">
                 <div className="text-[10px] uppercase tracking-[0.28em] text-muted font-semibold mb-3 sm:mb-4">
@@ -863,7 +865,7 @@ export default function Home() {
 
         {/* CONTACT */}
         <section id="contact" className="py-20 sm:py-28 lg:py-32 bg-background">
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
             <div className="flex items-end justify-between gap-6 mb-12 sm:mb-16 lg:mb-20 pb-6 border-b border-border">
               <div className="text-[10px] uppercase tracking-[0.28em] text-muted font-semibold">
                 No. 09 — Contact
@@ -943,7 +945,7 @@ export default function Home() {
 
       {/* FOOTER — minimal, theme-aware, no featured image */}
       <footer className="bg-surface border-t border-border">
-        <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
           {/* Newsletter row — clean and minimal */}
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-end py-14 sm:py-16 lg:py-20 border-b border-border">
             <div className="lg:col-span-6">
@@ -990,8 +992,8 @@ export default function Home() {
               </div>
               <p className="text-muted leading-relaxed text-[14px] max-w-xs">
                 Pioneer in free-range egg production. We deliver organic
-                Lohmann Brown eggs across Pakistan — straight from our farm in
-                Lahore.
+                Lohmann Black eggs across Pakistan — straight from our farm
+                in Jhang Sadar, Punjab.
               </p>
             </div>
 

@@ -15,22 +15,23 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Happy Hens Poultry — Organic Free Range Eggs from Lahore",
+  title:
+    "Happy Hens Poultry — Organic Free Range Eggs from Jhang Sadar, Pakistan",
   description:
-    "Pakistan's pioneer in free-range egg production. We raise Lohmann Black hens in open sheds with organic feed — for eggs naturally rich in Vitamin D and Omega-3.",
+    "Pakistan's pioneer in free-range egg production. We raise Lohmann Black hens in open sheds at our Jhang Sadar farm — for eggs naturally rich in Vitamin D and Omega-3.",
   keywords: [
     "free range eggs",
     "organic eggs Pakistan",
     "Happy Hens",
     "Lohmann Black",
-    "Lahore eggs",
+    "Jhang Sadar farm",
     "certified humane",
     "farm fresh eggs",
   ],
   openGraph: {
     title: "Happy Hens Poultry — Organic Free Range Eggs",
     description:
-      "Tasty, naturally enriched eggs from happy, free-roaming Lohmann Black hens.",
+      "Tasty, naturally enriched eggs from happy, free-roaming Lohmann Black hens at our Jhang Sadar farm.",
     type: "website",
   },
 };
