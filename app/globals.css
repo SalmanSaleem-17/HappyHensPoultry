@@ -3,6 +3,7 @@
 /* LIGHT MODE — warm cream + terracotta + champagne gold */
 :root,
 :root[data-theme="light"] {
+  color-scheme: light;
   --background: #f5f0e3;
   --surface: #fdfaf2;
   --surface-2: #ebe4d1;
@@ -23,6 +24,7 @@
 
 /* DARK MODE — deep warm charcoal + warm terracotta + soft gold */
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --background: #0f0d0a;
   --surface: #181410;
   --surface-2: #221c16;
@@ -39,6 +41,12 @@
   --inverse-bg: #f3ede0;
   --inverse-fg: #14110d;
   --shadow-color: 0 0 0;
+}
+
+/* Theme-aware native form controls */
+select option {
+  background: var(--surface);
+  color: var(--foreground);
 }
 
 @theme inline {
