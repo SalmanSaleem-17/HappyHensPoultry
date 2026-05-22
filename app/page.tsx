@@ -5,7 +5,6 @@ import ProductFlipImage from "./components/ProductFlipImage";
 import { SectionHeader } from "./components/helpers";
 import {
   IMG,
-  MARQUEE,
   PRODUCTS,
   REVIEWS,
   BLOG,
@@ -17,23 +16,11 @@ export default function Home() {
     <>
       <Hero />
 
-      {/* MARQUEE */}
-      <section className="bg-foreground text-background py-4 sm:py-5 overflow-hidden border-y border-border">
-        <div className="flex animate-marquee whitespace-nowrap">
-          {[...MARQUEE, ...MARQUEE, ...MARQUEE, ...MARQUEE].map((m, i) => (
-            <span
-              key={i}
-              className="font-display text-xl sm:text-2xl lg:text-3xl italic px-6 sm:px-8 flex items-center gap-6 sm:gap-8"
-            >
-              {m}
-              <span className="w-1.5 h-1.5 rounded-full bg-highlight"></span>
-            </span>
-          ))}
-        </div>
-      </section>
+      {/* Section divider */}
+      <hr className="border-t border-border" />
 
       {/* PHILOSOPHY PULL QUOTE */}
-      <section className="relative py-20 sm:py-28 lg:py-36 bg-background overflow-hidden">
+      <section className="relative py-20 sm:py-28 lg:py-36 bg-surface border-y border-border overflow-hidden">
         <div className="absolute -top-20 -right-20 w-72 h-72 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-highlight/15 rounded-full blur-3xl pointer-events-none" />
         <div className="relative max-w-5xl mx-auto px-5 sm:px-8 text-center">
@@ -57,7 +44,7 @@ export default function Home() {
       </section>
 
       {/* PRODUCTS PREVIEW → /eggs */}
-      <section className="py-20 sm:py-28 lg:py-32 bg-surface border-y border-border">
+      <section className="py-20 sm:py-28 lg:py-32 bg-background">
         <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 mb-12 sm:mb-16 lg:mb-20 pb-6 border-b border-border">
             <div className="max-w-2xl">

@@ -132,11 +132,11 @@ export default function Hero() {
               {/* Egg + glow + orbit rings overlay */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 {/* Soft warm glow behind the egg */}
-                <div className="absolute w-[64%] sm:w-[58%] lg:w-[55%] aspect-square rounded-full bg-highlight-soft/70 blur-2xl" />
+                <div className="absolute w-[44%] sm:w-[54%] lg:w-[55%] aspect-square rounded-full bg-highlight-soft/70 blur-2xl" />
                 {/* Outer dashed orbit */}
-                <div className="absolute w-[68%] sm:w-[60%] lg:w-[58%] aspect-square rounded-full border border-dashed border-accent/25" />
+                <div className="absolute w-[50%] sm:w-[60%] lg:w-[58%] aspect-square rounded-full border border-dashed border-accent/25" />
                 {/* Inner dashed orbit */}
-                <div className="absolute w-[52%] sm:w-[46%] lg:w-[44%] aspect-square rounded-full border border-dashed border-accent/15" />
+                <div className="absolute w-[38%] sm:w-[46%] lg:w-[44%] aspect-square rounded-full border border-dashed border-accent/15" />
                 {/* The egg itself */}
                 <Image
                   src="/insights.svg"
@@ -144,7 +144,7 @@ export default function Hero() {
                   width={420}
                   height={420}
                   priority
-                  className="relative w-[52%] sm:w-[46%] lg:w-[44%] aspect-square object-contain drop-shadow-[0_28px_40px_rgba(123,80,40,0.32)] animate-float"
+                  className="relative w-[34%] sm:w-[44%] lg:w-[44%] aspect-square object-contain drop-shadow-[0_28px_40px_rgba(123,80,40,0.32)] animate-float"
                 />
               </div>
             </div>
