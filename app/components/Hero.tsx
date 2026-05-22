@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { INSIGHTS } from "../../lib/data";
 
 // 8 stats arranged around a central egg in a 3×3 grid.
@@ -62,16 +63,16 @@ export default function Hero() {
             </p>
 
             <div className="mt-5 sm:mt-6 flex flex-wrap items-center gap-4 sm:gap-5">
-              <a
-                href="#contact"
+              <Link
+                href="/contact"
                 className="cta-premium inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-surface text-sm font-medium px-6 sm:px-7 py-3.5 sm:py-4 rounded-full"
               >
                 Order fresh eggs
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/about"
                 className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-accent transition-colors group border-b border-foreground/20 hover:border-accent pb-1"
               >
@@ -79,7 +80,7 @@ export default function Hero() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-0.5 transition-transform">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
             </div>
 
             {/* Trust badges — printed on every Happy Hens carton */}
