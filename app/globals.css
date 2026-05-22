@@ -63,8 +63,13 @@
   --font-display: var(--font-display);
 }
 
-html {
+html,
+body {
   scroll-behavior: smooth;
+  /* Clip is stronger than hidden — guarantees nothing escapes horizontally
+     even when descendants ignore overflow:hidden on flex/grid parents. */
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
