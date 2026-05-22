@@ -2,28 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import ThemeToggle from "./ThemeToggle";
-
-const NAV_LINKS = [
-  { href: "#home", label: "Home" },
-  { href: "#about", label: "Story" },
-  { href: "#breed", label: "The Breed" },
-  { href: "#process", label: "Our Process" },
-  { href: "#products", label: "Eggs" },
-  { href: "#reviews", label: "Reviews" },
-  { href: "#contact", label: "Contact" },
-];
+import { NAV_LINKS } from "../../lib/data";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-surface border-b border-border">
       <nav className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
         <div className="flex items-center justify-between h-16">
           <Link
-            href="#home"
+            href="/"
             className="flex items-center gap-2.5"
             aria-label="Happy Hens Poultry — Home"
           >
@@ -42,35 +35,45 @@ export default function Navbar() {
                 Happy Hens
               </span>
               <span className="text-[9px] uppercase tracking-[0.22em] text-muted">
-                Free Range · Jhang Sadar
+                Free Range Pakistan
               </span>
             </div>
           </Link>
 
           <ul className="hidden lg:flex items-center gap-0.5">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="px-3 py-2 text-[13px] font-medium text-foreground/75 hover:text-accent transition-colors"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname?.startsWith(link.href);
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`px-3 py-2 text-[13px] font-medium transition-colors ${
+                      active
+                        ? "text-accent"
+                        : "text-foreground/75 hover:text-accent"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="hidden lg:flex items-center gap-3">
             <ThemeToggle />
-            <a
-              href="#contact"
+            <Link
+              href="/contact"
               className="inline-flex items-center gap-1.5 bg-accent hover:bg-accent-hover text-surface text-[13px] font-medium px-5 py-2.5 rounded-full transition-colors"
             >
               Order Eggs
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
           </div>
 
           <div className="lg:hidden flex items-center gap-2">
@@ -78,7 +81,9 @@ export default function Navbar() {
             <button
               type="button"
               aria-label="Toggle menu"
-              aria-expanded={open}
+              {...(open
+                ? { "aria-expanded": "true" as const }
+                : { "aria-expanded": "false" as const })}
               onClick={() => setOpen((v) => !v)}
               className="p-2 -mr-2 text-foreground"
             >
@@ -96,25 +101,35 @@ export default function Navbar() {
         {open && (
           <div className="lg:hidden pb-5 pt-1 border-t border-border animate-fade-in">
             <ul className="flex flex-col gap-0.5 pt-3">
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="block px-3 py-2.5 text-[15px] font-medium text-foreground/80 hover:text-accent hover:bg-surface-2 rounded-md transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const active =
+                  link.href === "/"
+                    ? pathname === "/"
+                    : pathname?.startsWith(link.href);
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      className={`block px-3 py-2.5 text-[15px] font-medium rounded-md transition-colors ${
+                        active
+                          ? "text-accent bg-accent-soft"
+                          : "text-foreground/80 hover:text-accent hover:bg-surface-2"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
-            <a
-              href="#contact"
+            <Link
+              href="/contact"
               onClick={() => setOpen(false)}
               className="mt-4 inline-flex w-full items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-surface text-sm font-medium px-4 py-3 rounded-full transition-colors"
             >
               Order Eggs
-            </a>
+            </Link>
           </div>
         )}
       </nav>

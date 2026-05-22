@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* LIGHT MODE — warm cream + terracotta + champagne gold */
+/* LIGHT MODE — cream + forest green + champagne gold (matches Happy Hens box) */
 :root,
 :root[data-theme="light"] {
   color-scheme: light;
@@ -12,9 +12,9 @@
   --subtle: #aea58f;
   --border: #e0d8c1;
   --border-strong: #c8bfa3;
-  --accent: #b54a1f;
-  --accent-hover: #903a18;
-  --accent-soft: #f3dccd;
+  --accent: #2d4a36;
+  --accent-hover: #1f3527;
+  --accent-soft: #dfe6dc;
   --highlight: #b8851f;
   --highlight-soft: #f3e7c6;
   --inverse-bg: #14110d;
@@ -22,31 +22,25 @@
   --shadow-color: 26 20 16;
 }
 
-/* DARK MODE — deep warm charcoal + warm terracotta + soft gold */
+/* DARK MODE — deep forest night + emerald + warm gold */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #0f0d0a;
-  --surface: #181410;
-  --surface-2: #221c16;
-  --foreground: #f3ede0;
-  --muted: #9c9385;
-  --subtle: #6b6356;
-  --border: #2a231b;
-  --border-strong: #3d3428;
-  --accent: #e07a4a;
-  --accent-hover: #ec8d5e;
-  --accent-soft: #2c1c12;
-  --highlight: #d8b370;
-  --highlight-soft: #2c2418;
-  --inverse-bg: #f3ede0;
-  --inverse-fg: #14110d;
+  --background: #0e1b16;
+  --surface: #16261f;
+  --surface-2: #1d3028;
+  --foreground: #f6f1e7;
+  --muted: #9eaaa3;
+  --subtle: #6a7770;
+  --border: #30483d;
+  --border-strong: #456256;
+  --accent: #3e8b63;
+  --accent-hover: #4ea375;
+  --accent-soft: #1d3028;
+  --highlight: #e2b45c;
+  --highlight-soft: #2a2418;
+  --inverse-bg: #f6f1e7;
+  --inverse-fg: #16261f;
   --shadow-color: 0 0 0;
-}
-
-/* Theme-aware native form controls */
-select option {
-  background: var(--surface);
-  color: var(--foreground);
 }
 
 @theme inline {
@@ -65,7 +59,7 @@ select option {
   --color-highlight-soft: var(--highlight-soft);
   --color-inverse-bg: var(--inverse-bg);
   --color-inverse-fg: var(--inverse-fg);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-display: var(--font-display);
 }
 
@@ -76,13 +70,12 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Inter, system-ui, sans-serif;
+  font-family: var(--font-sans), Poppins, Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* Smooth color transitions for themed elements */
 * {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-duration: 0.25s;
@@ -104,6 +97,11 @@ body {
   100% { transform: translateX(-50%); }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%     { transform: translateY(-14px); }
+}
+
 .animate-fade-in {
   animation: fade-in 0.9s ease-out forwards;
 }
@@ -114,6 +112,40 @@ body {
 
 .animate-marquee {
   animation: marquee 38s linear infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float { animation: none; }
+}
+
+/* Subtle premium radial gradient for the hero — depth without breaking the cream minimalism */
+.hero-bg {
+  background:
+    radial-gradient(circle at 85% 18%, color-mix(in oklab, var(--highlight) 22%, transparent) 0%, transparent 38%),
+    radial-gradient(circle at 8% 88%, color-mix(in oklab, var(--accent) 14%, transparent) 0%, transparent 36%),
+    var(--background);
+}
+
+/* Premium CTA — sits up off the page with a warm shadow and lifts on hover */
+.cta-premium {
+  box-shadow:
+    0 10px 24px -8px color-mix(in oklab, var(--accent) 55%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 0.25s ease;
+}
+
+.cta-premium:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 18px 32px -10px color-mix(in oklab, var(--accent) 60%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 ::selection {
@@ -138,25 +170,47 @@ body {
   background: var(--muted);
 }
 
-.text-balance {
-  text-wrap: balance;
+@supports (text-wrap: balance) {
+  .text-balance {
+    text-wrap: balance;
+  }
 }
 
-.text-pretty {
-  text-wrap: pretty;
+@supports (text-wrap: pretty) {
+  .text-pretty {
+    text-wrap: pretty;
+  }
 }
 
-.divider-fancy {
+select option {
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+/* 3D flip card — closed image on front, open egg-box on back */
+.flip-card {
+  perspective: 1200px;
+}
+
+.flip-card-inner {
   position: relative;
-  height: 1px;
-  background: var(--border);
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform-style: preserve-3d;
 }
 
-.divider-fancy::after {
-  content: "";
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-face {
   position: absolute;
   inset: 0;
-  width: 60px;
-  height: 1px;
-  background: var(--accent);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
 }

@@ -1,40 +1,70 @@
 import Image from "next/image";
+import { INSIGHTS } from "../../lib/data";
+
+// 8 stats arranged around a central egg in a 3×3 grid.
+// Slot order (top-left → bottom-right, center is the egg overlay):
+//   1   2   3
+//   4  egg  5
+//   6   7   8
+const SLOT_ALIGN = [
+  "start",
+  "center",
+  "end",
+  "start",
+  "end",
+  "start",
+  "center",
+  "end",
+] as const;
 
 export default function Hero() {
   return (
     <section
       id="home"
-      className="relative pt-20 lg:pt-24 bg-background overflow-hidden"
+      className="relative pt-16 lg:pt-18 hero-bg overflow-hidden"
     >
-      {/* Soft decorative blobs for depth */}
-      <div className="absolute -top-32 -left-20 w-md h-112 rounded-full bg-highlight/15 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 right-0 w-md h-112 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+      {/* Decorative blurs */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-highlight/15 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
 
-      <div className="relative max-w-350 mx-auto px-5 sm:px-8 lg:px-12 pt-10 sm:pt-16 lg:pt-20 pb-14 lg:pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+      <div className="relative max-w-350 mx-auto px-5 sm:px-8 lg:px-12 pb-8 sm:pb-10 lg:pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           {/* LEFT — copy */}
-          <div className="lg:col-span-6 animate-fade-in order-2 lg:order-1">
-            <div className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-accent font-semibold mb-7 sm:mb-9">
-              <span className="w-2 h-2 rounded-full bg-accent"></span>
-              Free Range · Jhang Sadar
+          <div className="lg:col-span-5 animate-fade-in">
+            {/* Attractor pill — category tagline (replaces the plain eyebrow) */}
+            <div className="inline-flex items-center gap-2.5 bg-accent-soft border border-accent/25 rounded-full pl-2.5 pr-4 py-1.5 mb-3 sm:mb-4 shadow-sm mt-2">
+              <span className="relative flex w-2 h-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-60 animate-ping"></span>
+                <span className="relative inline-flex w-2 h-2 rounded-full bg-accent"></span>
+              </span>
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] font-semibold text-accent whitespace-nowrap">
+                Organic Eggs · Open Poultry Farm
+              </span>
             </div>
 
-            <h1 className="font-display text-[clamp(2.75rem,8.4vw,6rem)] font-medium text-foreground leading-[0.95] tracking-tight text-balance">
+            <h1 className="font-display text-[clamp(2.5rem,6.5vw,5rem)] font-medium text-foreground leading-[0.95] tracking-tight text-balance">
               Eggs from{" "}
               <span className="italic text-accent">truly happy</span> hens.
             </h1>
 
-            <p className="mt-7 sm:mt-9 text-base sm:text-lg text-muted max-w-md leading-relaxed text-pretty">
+            <div className="mt-3 sm:mt-4 inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-muted font-semibold">
+              <span className="w-6 h-px bg-border-strong"></span>
+              Free Range · Pakistan
+            </div>
+
+            <p className="mt-4 sm:mt-5 text-base sm:text-lg text-muted max-w-md leading-relaxed text-pretty">
               We raise{" "}
-              <span className="text-foreground font-medium">Lohmann Brown</span>{" "}
-              hens in open sheds — no cages, no artificial light. Just sunshine,
-              organic feed, and room to roam.
+              <span className="text-foreground font-medium">
+                Lohmann Brown &amp; Black
+              </span>{" "}
+              hens in open sheds — no cages, no artificial light. Just
+              sunshine, organic feed, and room to roam.
             </p>
 
-            <div className="mt-9 sm:mt-11 flex flex-wrap items-center gap-4 sm:gap-5">
+            <div className="mt-5 sm:mt-6 flex flex-wrap items-center gap-4 sm:gap-5">
               <a
                 href="#contact"
-                className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-surface text-sm font-medium px-6 sm:px-7 py-3.5 sm:py-4 rounded-full transition-colors"
+                className="cta-premium inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-surface text-sm font-medium px-6 sm:px-7 py-3.5 sm:py-4 rounded-full"
               >
                 Order fresh eggs
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -42,7 +72,7 @@ export default function Hero() {
                 </svg>
               </a>
               <a
-                href="#about"
+                href="/about"
                 className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-accent transition-colors group border-b border-foreground/20 hover:border-accent pb-1"
               >
                 Read our story
@@ -51,79 +81,126 @@ export default function Hero() {
                 </svg>
               </a>
             </div>
+
+            {/* Trust badges — printed on every Happy Hens carton */}
+            <ul className="mt-5 sm:mt-6 flex flex-wrap items-center gap-x-5 gap-y-2.5 sm:gap-x-6 text-[11px] sm:text-[13px] font-medium text-foreground/80">
+              {[
+                "Fresh Eggs Daily",
+                "Clean & Hygienic",
+                "Farm to Table",
+              ].map((t) => (
+                <li key={t} className="inline-flex items-center gap-1.5">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-accent shrink-0"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  {t}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* RIGHT — image composition (no video) */}
-          <div className="lg:col-span-6 relative order-1 lg:order-2">
-            <div className="relative">
-              {/* Main hero image */}
-              <div className="relative aspect-4/5 sm:aspect-5/6 overflow-hidden bg-surface-2 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)]">
+          {/* RIGHT — insights radiating around the egg */}
+          <div className="lg:col-span-7 relative">
+            <div className="relative mx-auto w-full max-w-md sm:max-w-xl lg:max-w-2xl">
+              {/* 3×3 grid: stats fill 8 cells, center cell is a sizing spacer */}
+              <div className="relative grid grid-cols-3 grid-rows-3 gap-2 sm:gap-5 lg:gap-6">
+                <InsightSlot insight={INSIGHTS[0]} align={SLOT_ALIGN[0]} />
+                <InsightSlot insight={INSIGHTS[1]} align={SLOT_ALIGN[1]} />
+                <InsightSlot insight={INSIGHTS[2]} align={SLOT_ALIGN[2]} />
+
+                <InsightSlot insight={INSIGHTS[3]} align={SLOT_ALIGN[3]} />
+                {/* Center spacer — defines the row height; egg overlays this */}
+                <div className="aspect-square" aria-hidden="true" />
+                <InsightSlot insight={INSIGHTS[4]} align={SLOT_ALIGN[4]} />
+
+                <InsightSlot insight={INSIGHTS[5]} align={SLOT_ALIGN[5]} />
+                <InsightSlot insight={INSIGHTS[6]} align={SLOT_ALIGN[6]} />
+                <InsightSlot insight={INSIGHTS[7]} align={SLOT_ALIGN[7]} />
+              </div>
+
+              {/* Egg + glow + orbit rings overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                {/* Soft warm glow behind the egg */}
+                <div className="absolute w-[64%] sm:w-[58%] lg:w-[55%] aspect-square rounded-full bg-highlight-soft/70 blur-2xl" />
+                {/* Outer dashed orbit */}
+                <div className="absolute w-[68%] sm:w-[60%] lg:w-[58%] aspect-square rounded-full border border-dashed border-accent/25" />
+                {/* Inner dashed orbit */}
+                <div className="absolute w-[52%] sm:w-[46%] lg:w-[44%] aspect-square rounded-full border border-dashed border-accent/15" />
+                {/* The egg itself */}
                 <Image
-                  src="/packaging.jpg"
-                  alt="Happy Hens egg cartons styled with fresh flowers"
-                  fill
+                  src="/insights.svg"
+                  alt="Free-range brown egg"
+                  width={420}
+                  height={420}
                   priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
+                  className="relative w-[52%] sm:w-[46%] lg:w-[44%] aspect-square object-contain drop-shadow-[0_28px_40px_rgba(123,80,40,0.32)] animate-float"
                 />
-
-                {/* Editorial label */}
-                <div className="absolute top-5 left-5 bg-surface/95 backdrop-blur-sm px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] text-foreground font-semibold">
-                  Plate · 01
-                </div>
               </div>
+            </div>
 
-              {/* Floating accent card — bottom left */}
-              <div className="hidden sm:block absolute -bottom-8 -left-6 lg:-left-10 max-w-60 bg-surface border border-border p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.18)]">
-                <div className="text-[10px] uppercase tracking-[0.22em] text-highlight font-semibold">
-                  ★ 5.0
-                </div>
-                <p className="mt-2 font-display text-base text-foreground leading-snug">
-                  &ldquo;You can taste the story behind these eggs.&rdquo;
-                </p>
-                <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-muted font-medium">
-                  Mr. Farrukh · Lahore
-                </p>
-              </div>
-
-              {/* Floating accent card — top right */}
-              <div className="hidden lg:block absolute -top-6 -right-8 bg-accent text-surface p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)]">
-                <div className="text-[10px] uppercase tracking-[0.22em] text-highlight font-semibold">
-                  Avg. weight
-                </div>
-                <div className="font-display text-3xl mt-1.5 leading-none">
-                  63<span className="text-base text-surface/70">g</span>
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.22em] text-surface/70 mt-1.5">
-                  Lohmann Brown
-                </div>
-              </div>
+            {/* Brand tagline — the slogan printed on every Happy Hens carton */}
+            <div className="mt-5 sm:mt-7 lg:mt-8 flex items-center justify-center gap-4 sm:gap-5">
+              <span aria-hidden="true" className="h-px flex-1 max-w-12 sm:max-w-16 bg-accent/30"></span>
+              <p className="font-display italic text-xl sm:text-2xl lg:text-3xl text-accent leading-none text-center">
+                Pure Goodness in Every Shell
+              </p>
+              <span aria-hidden="true" className="h-px flex-1 max-w-12 sm:max-w-16 bg-accent/30"></span>
             </div>
           </div>
-        </div>
-
-        {/* Stats bar */}
-        <div className="mt-20 sm:mt-24 lg:mt-28 grid grid-cols-2 lg:grid-cols-4 gap-px bg-border border border-border">
-          {[
-            { value: "100%", label: "Organic feed" },
-            { value: "0", label: "Cages or chemicals" },
-            { value: "4", label: "Cities served" },
-            { value: "5★", label: "Customer rating" },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="bg-background p-5 sm:p-7 lg:p-8 hover:bg-surface transition-colors"
-            >
-              <div className="font-display text-3xl sm:text-4xl lg:text-5xl font-medium text-foreground leading-none">
-                {s.value}
-              </div>
-              <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-muted mt-2 sm:mt-3 font-medium">
-                {s.label}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function InsightSlot({
+  insight,
+  align,
+}: {
+  insight: { value: string; label: string; kind: "more" | "less" };
+  align: "start" | "center" | "end";
+}) {
+  const alignClass =
+    align === "start"
+      ? "items-start text-left"
+      : align === "end"
+      ? "items-end text-right"
+      : "items-center text-center";
+
+  return (
+    <div
+      className={`flex flex-col justify-center ${alignClass} px-0.5 sm:px-2`}
+    >
+      <div
+        className={`flex items-baseline gap-1 sm:gap-1.5 ${
+          align === "end" ? "flex-row-reverse" : ""
+        }`}
+      >
+        <span className="font-display text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-medium text-accent leading-none">
+          {insight.value}
+        </span>
+        <span
+          className={`text-[9px] sm:text-[10px] uppercase tracking-[0.18em] font-semibold ${
+            insight.kind === "more" ? "text-accent" : "text-highlight"
+          }`}
+        >
+          {insight.kind}
+        </span>
+      </div>
+      <div className="mt-1 text-[10px] sm:text-[11px] lg:text-[12px] text-muted leading-tight font-medium">
+        {insight.label}
+      </div>
+    </div>
   );
 }

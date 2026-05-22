@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Playfair_Display } from "next/font/google";
+import { Poppins, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const playfair = Playfair_Display({
@@ -18,11 +21,12 @@ export const metadata: Metadata = {
   title:
     "Happy Hens Poultry — Organic Free Range Eggs from Jhang Sadar, Pakistan",
   description:
-    "Pakistan's pioneer in free-range egg production. We raise Lohmann Black hens in open sheds at our Jhang Sadar farm — for eggs naturally rich in Vitamin D and Omega-3.",
+    "Pakistan's pioneer in free-range egg production. We raise Lohmann Brown & Black hens in open sheds at our Jhang Sadar farm — for eggs naturally rich in Vitamin D and Omega-3.",
   keywords: [
     "free range eggs",
     "organic eggs Pakistan",
     "Happy Hens",
+    "Lohmann Brown",
     "Lohmann Black",
     "Jhang Sadar farm",
     "certified humane",
@@ -31,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Happy Hens Poultry — Organic Free Range Eggs",
     description:
-      "Tasty, naturally enriched eggs from happy, free-roaming Lohmann Black hens at our Jhang Sadar farm.",
+      "Tasty, naturally enriched eggs from happy, free-roaming Lohmann hens at our Jhang Sadar farm.",
     type: "website",
   },
 };
@@ -48,13 +52,15 @@ export default function RootLayout({
       lang="en"
       data-theme="light"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${playfair.variable} h-full antialiased`}
+      className={`${poppins.variable} ${playfair.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );
