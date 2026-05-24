@@ -63,6 +63,25 @@
   --font-display: var(--font-display);
 }
 
+/* --------------------------------------------------------------------------
+   Fixed-header layout system
+   --------------------------------------------------------------------------
+   Single source of truth for the height of the fixed top bar + navbar.
+   - <body> reserves this space via padding-top → page content starts below
+     the header automatically; individual pages never need to know.
+   - <html scroll-padding-top> makes in-page anchor links scroll correctly
+     (so links to #section land just below the header, not behind it).
+   - Update only this variable when the header grows or shrinks.
+-------------------------------------------------------------------------- */
+:root {
+  --header-height: 6rem;       /* mobile: top bar 32px + navbar 64px = 96px */
+}
+@media (min-width: 640px) {
+  :root {
+    --header-height: 6.25rem;  /* sm+ :  top bar 36px + navbar 64px = 100px */
+  }
+}
+
 html,
 body {
   scroll-behavior: smooth;
@@ -70,6 +89,14 @@ body {
      even when descendants ignore overflow:hidden on flex/grid parents. */
   overflow-x: clip;
   max-width: 100%;
+}
+
+html {
+  scroll-padding-top: var(--header-height);
+}
+
+body {
+  padding-top: var(--header-height);
 }
 
 body {

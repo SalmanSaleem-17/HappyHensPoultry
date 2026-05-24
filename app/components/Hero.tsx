@@ -22,7 +22,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative pt-16 lg:pt-18 hero-bg overflow-hidden"
+      className="relative hero-bg overflow-hidden"
     >
       {/* Decorative blurs */}
       <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-highlight/15 blur-3xl pointer-events-none" />

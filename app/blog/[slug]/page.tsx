@@ -52,7 +52,7 @@ export default async function BlogPostPage({ params }: { params: Params }) {
   return (
     <article>
       {/* TOP META + TITLE */}
-      <section className="relative pt-24 sm:pt-28 lg:pt-32 pb-10 sm:pb-14 bg-background overflow-hidden">
+      <section className="relative pt-8 sm:pt-12 lg:pt-16 pb-10 sm:pb-14 bg-background overflow-hidden">
         <div className="absolute -top-20 -right-20 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-highlight/10 rounded-full blur-3xl pointer-events-none" />
 

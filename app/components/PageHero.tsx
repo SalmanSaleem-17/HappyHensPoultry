@@ -10,7 +10,7 @@ export default function PageHero({
   intro?: string;
 }) {
   return (
-    <section className="relative pt-24 sm:pt-26 lg:pt-28 pb-10 sm:pb-12 lg:pb-14 bg-background overflow-hidden">
+    <section className="relative pt-8 sm:pt-10 lg:pt-12 pb-10 sm:pb-12 lg:pb-14 bg-background overflow-hidden">
       <div className="absolute -top-20 -right-20 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-highlight/10 rounded-full blur-3xl pointer-events-none" />
 
