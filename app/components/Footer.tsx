@@ -128,17 +128,16 @@ export default function Footer() {
           <div className="flex items-center gap-5 sm:gap-6">
             <a href="#" className="hover:text-accent transition-colors">Privacy</a>
             <a href="#" className="hover:text-accent transition-colors">Terms</a>
-            <a
-              href="https://certifiedhumane.org/the-happy-hens-farm/"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/eggs#certification"
               className="hover:text-accent transition-colors inline-flex items-center gap-1.5"
             >
-              Certified Humane
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 17L17 7M7 7h10v10" />
+              PCSIR Certified
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 12l2 2 4-4" />
+                <circle cx="12" cy="12" r="10" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

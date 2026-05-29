@@ -79,7 +79,7 @@ export const FEATURES: {
   {
     n: "06",
     title: "Farm-fresh delivery",
-    body: "Across Lahore, Faisalabad, Islamabad and Jhang — straight to your door.",
+    body: "Local in Jhang Sadar & Lahore for any order. Other cities ship on bulk orders of 3+ trays.",
     icon: "truck",
   },
 ];
@@ -106,7 +106,7 @@ export const PROCESS = [
   {
     n: "04",
     title: "To your door",
-    body: "Sorted, candled, packed in trays and delivered fresh across four cities.",
+    body: "Sorted, candled, packed in trays — delivered fresh locally in Jhang Sadar & Lahore, or shipped on bulk orders.",
     image: IMG.packaging,
   },
 ];
@@ -136,7 +136,30 @@ export const REVIEWS = [
 // Re-export the summary array for previews and the blog index.
 export { BLOG } from "../utils/blogData";
 
-export const CITIES = ["Lahore", "Faisalabad", "Islamabad", "Jhang"];
+// Two-tier delivery model:
+//  - LOCAL  → Jhang Sadar + Lahore, any order size
+//  - BULK   → orders of 3 trays or more ship to other cities on request
+export const DELIVERY = {
+  local: {
+    label: "Local delivery",
+    minOrder: "Any order size",
+    cities: ["Jhang Sadar", "Lahore"],
+    note: "Same-day or next-day to your door across Punjab.",
+  },
+  bulk: {
+    label: "Bulk delivery",
+    minTrays: 3,
+    minOrder: "3 trays or more",
+    cities: ["Faisalabad", "Islamabad", "Rawalpindi", "Karachi", "Multan"],
+    note: "Available on bulk orders — other cities on request.",
+  },
+} as const;
+
+// Backward-compat alias for components that still iterate a flat list.
+export const CITIES: readonly string[] = [
+  ...DELIVERY.local.cities,
+  ...DELIVERY.bulk.cities,
+];
 
 export const BREED_FACTS = [
   { label: "Varieties", value: "Brown · Black" },
@@ -151,7 +174,7 @@ export const PRODUCTS = [
   {
     name: "Half Dozen",
     count: "6 eggs",
-    price: "PKR 480",
+    price: "PKR 250",
     desc: "Perfect for trying us out or for a small household.",
     popular: false,
     imageClosed:
@@ -162,7 +185,7 @@ export const PRODUCTS = [
   {
     name: "Dozen Tray",
     count: "12 eggs",
-    price: "PKR 920",
+    price: "PKR 500",
     desc: "Our most popular size — ideal for a week of breakfasts.",
     popular: true,
     imageClosed:
@@ -173,7 +196,7 @@ export const PRODUCTS = [
   {
     name: "Family Pack",
     count: "30 eggs",
-    price: "PKR 2,150",
+    price: "PKR 1200",
     desc: "Bulk pricing for big families and serious egg lovers.",
     popular: false,
     imageClosed:
@@ -222,6 +245,49 @@ export const WHY_DIFFERENT = [
     body: "Research suggests enjoying up to two eggs a day is a healthy way to fuel your body without impacting heart health.",
   },
 ];
+
+// PCSIR — Pakistan Council of Scientific & Industrial Research lab test results.
+// Government of Pakistan certificate, report no. FBRC/SU/ANAL./REP./1414.
+// Tested at PCSIR Laboratories Complex, Ferozepur Road, Lahore.
+export const CERTIFICATION = {
+  issuer: {
+    authority: "Government of Pakistan",
+    ministry: "Ministry of Science & Technology",
+    lab: "PCSIR Laboratories Complex · Lahore",
+    accreditation: "UNICERT · SAS K004",
+  },
+  report: {
+    number: "FBRC/SU/ANAL./REP./1414",
+    issued: "February 2026",
+    method: "A.O.A.C., 2023",
+    sample: "Happy Hens free-range egg",
+    nonCompliance: "Nil",
+  },
+  // The scanned PCSIR test report served from /public.
+  document: {
+    url: "/certificate-happy-hens.jpeg",
+    downloadAs: "HappyHens-PCSIR-Test-Report-2026.jpeg",
+  },
+  // Numbers per 100 g of egg, straight from the test report.
+  results: [
+    { label: "Protein",       value: "16.56", unit: "g",  highlight: true  },
+    { label: "Omega-3",       value: "380",   unit: "mg", highlight: true  },
+    { label: "Energy",        value: "144.24", unit: "kcal" },
+    { label: "Fat",           value: "7.60",  unit: "g" },
+    { label: "Carbohydrates", value: "2.40",  unit: "g" },
+    { label: "Moisture",      value: "72.40", unit: "g" },
+    { label: "Vitamin D",     value: "1.97",  unit: "μg", highlight: true  },
+    { label: "Magnesium",     value: "14.86", unit: "mg" },
+    { label: "Zinc",          value: "0.36",  unit: "mg" },
+    { label: "Ash",           value: "1.00",  unit: "g" },
+    { label: "Fiber",         value: "—",     unit: "not detected" },
+  ] as Array<{
+    label: string;
+    value: string;
+    unit: string;
+    highlight?: boolean;
+  }>,
+};
 
 export const INSIGHTS: {
   value: string;

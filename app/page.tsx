@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Hero from "./components/Hero";
 import ProductFlipImage from "./components/ProductFlipImage";
+import DeliveryNetwork from "./components/DeliveryNetwork";
 import { SectionHeader } from "./components/helpers";
 import {
   IMG,
@@ -114,6 +115,11 @@ export default function Home() {
                 </div>
               </article>
             ))}
+          </div>
+
+          {/* DELIVERY NETWORK — two tiers, sits right below product prices */}
+          <div className="mt-14 sm:mt-16 lg:mt-20">
+            <DeliveryNetwork />
           </div>
         </div>
       </section>

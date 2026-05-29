@@ -138,7 +138,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Free delivery on every 2 trays across Lahore, Faisalabad, Islamabad and Jhang. WhatsApp the order, the eggs land at your door, the paratha skillet does the rest.",
+        text: "Local delivery in Jhang Sadar &amp; Lahore — any order size. Order 3 trays or more and we ship to Faisalabad, Islamabad, Rawalpindi, Karachi, Multan and beyond. WhatsApp us, the eggs land at your door, the paratha skillet does the rest.",
       },
       {
         type: "quote",

@@ -7,10 +7,11 @@ import { InsightStat } from "../components/helpers";
 import {
   IMG,
   PRODUCTS,
-  CITIES,
   WHY_DIFFERENT,
   INSIGHTS,
 } from "../../lib/data";
+import DeliveryNetwork from "../components/DeliveryNetwork";
+import CertificationPanel from "../components/CertificationPanel";
 
 export const metadata: Metadata = {
   title: "Our Eggs — Happy Hens Poultry",
@@ -80,36 +81,9 @@ export default function EggsPage() {
             ))}
           </div>
 
-          {/* Service area */}
-          <div className="mt-14 sm:mt-16 lg:mt-20 border border-border bg-background p-6 sm:p-10 lg:p-12 grid lg:grid-cols-2 gap-7 sm:gap-8 items-center">
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.28em] text-accent font-semibold mb-3 sm:mb-4">
-                Delivery network
-              </div>
-              <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl font-medium text-foreground leading-tight text-balance">
-                Find Happy Eggs near you —{" "}
-                <span className="italic text-accent">
-                  or get them delivered.
-                </span>
-              </h3>
-              <p className="mt-3 text-muted text-sm sm:text-base">
-                We currently serve four cities across Pakistan.
-              </p>
-            </div>
-            <ul className="flex flex-wrap gap-2 sm:gap-3 lg:justify-end">
-              {CITIES.map((c) => (
-                <li
-                  key={c}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 border border-border-strong text-sm sm:text-[15px] font-medium text-foreground"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent" aria-hidden="true">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  {c}
-                </li>
-              ))}
-            </ul>
+          {/* Delivery network — two tiers, single source in lib/data.ts → DELIVERY */}
+          <div className="mt-14 sm:mt-16 lg:mt-20">
+            <DeliveryNetwork />
           </div>
         </div>
       </section>
@@ -281,6 +255,31 @@ export default function EggsPage() {
             </span>
             <span className="w-10 sm:w-12 h-px bg-border-strong"></span>
           </div>
+        </div>
+      </section>
+
+      {/* CERTIFICATION — Government of Pakistan PCSIR lab test, substantiates the Insights above */}
+      <section
+        id="certification"
+        className="py-16 sm:py-24 lg:py-28 bg-surface border-y border-border"
+      >
+        <div className="max-w-350 mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 mb-10 sm:mb-14 lg:mb-16 pb-5 sm:pb-6 border-b border-border">
+            <div className="max-w-2xl">
+              <div className="text-[10px] uppercase tracking-[0.28em] text-muted font-semibold mb-3 sm:mb-4">
+                No. 04 — Certification
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-medium text-foreground leading-[1.08] tracking-tight text-balance">
+                The numbers,{" "}
+                <span className="italic text-accent">in writing.</span>
+              </h2>
+            </div>
+            <div className="text-[10px] uppercase tracking-[0.28em] text-muted font-semibold hidden sm:block">
+              PCSIR · Govt. of Pakistan
+            </div>
+          </div>
+
+          <CertificationPanel />
         </div>
       </section>
 

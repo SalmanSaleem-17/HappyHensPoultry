@@ -31,7 +31,7 @@ export default function AboutPage() {
             <div className="lg:col-span-7 order-2 lg:order-1">
               <div className="space-y-4 sm:space-y-5 text-base sm:text-[17px] text-muted leading-[1.7] text-pretty">
                 <p className="text-foreground font-display text-xl sm:text-2xl lg:text-[26px] leading-snug">
-                  Two friends — a software engineer and a salesman — were
+                  Two friends — a software engineer and a sales Expert — were
                   driving through the village of Taobat when their car gave up
                   on a quiet mountain road.
                 </p>
