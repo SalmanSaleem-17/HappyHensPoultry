@@ -16,6 +16,7 @@ import {
 export const CONTACT_RECIPIENTS = [
   "sales@happyhenspoultry.com",
   "ali.diwan58@gmail.com",
+  "shanisaleem17@gmail.com",
 ];
 
 /**
