@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { formatDeliveryDate, type OrderEnquiry } from "./order";
 
 /** Where contact-form enquiries are delivered. */
 export const CONTACT_RECIPIENTS = [
@@ -16,13 +17,7 @@ const FROM =
 
 const SITE_URL = "https://happyhenspoultry.com";
 
-export type ContactEnquiry = {
-  name: string;
-  email: string;
-  phone: string;
-  city: string;
-  message: string;
-};
+export type ContactEnquiry = OrderEnquiry;
 
 /* ---------- helpers ---------- */
 
@@ -97,7 +92,11 @@ function buildHtml(enquiry: ContactEnquiry, receivedAt: string) {
   const email = escapeHtml(enquiry.email);
   const phone = escapeHtml(enquiry.phone);
   const city = escapeHtml(enquiry.city);
-  const message = escapeHtml(enquiry.message).replace(/\n/g, "<br>");
+  const address = escapeHtml(enquiry.address).replace(/\n/g, "<br>");
+  const product = escapeHtml(enquiry.product);
+  const deliveryDate = escapeHtml(formatDeliveryDate(enquiry.deliveryDate));
+  const payment = escapeHtml(enquiry.payment);
+  const notes = escapeHtml(enquiry.notes).replace(/\n/g, "<br>");
   const wa = toWhatsAppNumber(enquiry.phone);
 
   const buttons = [
@@ -113,10 +112,10 @@ function buildHtml(enquiry: ContactEnquiry, receivedAt: string) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
   <meta name="supported-color-schemes" content="light">
-  <title>New enquiry from ${name}</title>
+  <title>New order from ${name}</title>
 </head>
 <body style="margin:0;padding:0;background:${C.bg};" bgcolor="${C.bg}">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${name}${city ? ` from ${city}` : ""} sent a message through the website contact form.</div>
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${product} for ${name} in ${city}, delivery ${deliveryDate}, ${payment}.</div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.bg}" style="background:${C.bg};">
     <tr>
@@ -132,7 +131,7 @@ function buildHtml(enquiry: ContactEnquiry, receivedAt: string) {
                   <td style="font-family:${FONT};font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:${C.headerSoft};font-weight:600;">Happy Hens Poultry</td>
                 </tr>
                 <tr>
-                  <td style="padding-top:10px;font-family:${FONT};font-size:24px;line-height:1.25;font-weight:700;color:#ffffff;">New website enquiry</td>
+                  <td style="padding-top:10px;font-family:${FONT};font-size:24px;line-height:1.25;font-weight:700;color:#ffffff;">New order request</td>
                 </tr>
                 <tr>
                   <td style="padding-top:6px;font-family:${FONT};font-size:13px;color:${C.headerSoft};">Received ${receivedAt} (PKT)</td>
@@ -145,26 +144,48 @@ function buildHtml(enquiry: ContactEnquiry, receivedAt: string) {
           <tr>
             <td bgcolor="${C.card}" style="background:${C.card};padding:28px 32px 8px;">
               <p style="margin:0 0 18px;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};">
-                <strong>${name}</strong> filled in the contact form on
+                <strong>${name}</strong> placed an order request on
                 <a href="${SITE_URL}/contact" style="color:${C.accent};text-decoration:none;">happyhenspoultry.com</a>.
               </p>
 
+              <!-- Order summary -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+                <tr>
+                  <td bgcolor="${C.msgBg}" style="background:${C.msgBg};border-radius:8px;padding:16px 18px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};padding-bottom:4px;">Product</td>
+                        <td style="font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};padding-bottom:4px;">Delivery date</td>
+                        <td style="font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};padding-bottom:4px;">Payment</td>
+                      </tr>
+                      <tr>
+                        <td style="font-family:${FONT};font-size:16px;font-weight:700;color:${C.text};padding-right:12px;">${product}</td>
+                        <td style="font-family:${FONT};font-size:16px;font-weight:700;color:${C.text};padding-right:12px;">${deliveryDate}</td>
+                        <td style="font-family:${FONT};font-size:16px;font-weight:700;color:${C.text};">${payment}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 4px;font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};">Customer</p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${C.border};">
                 ${detailRow("Name", name)}
+                ${detailRow("Telephone", `<a href="tel:${phone.replace(/\s/g, "")}" style="color:${C.accent};text-decoration:none;">${phone}</a>`)}
                 ${detailRow("Email", `<a href="mailto:${email}" style="color:${C.accent};text-decoration:none;">${email}</a>`)}
-                ${detailRow("Phone", phone ? `<a href="tel:${phone.replace(/\s/g, "")}" style="color:${C.accent};text-decoration:none;">${phone}</a>` : "")}
-                ${detailRow("City", city, true)}
+                ${detailRow("City", city)}
+                ${detailRow("Address", address, true)}
               </table>
             </td>
           </tr>
 
-          <!-- Message -->
+          <!-- Notes -->
           <tr>
             <td bgcolor="${C.card}" style="background:${C.card};padding:8px 32px 24px;">
-              <p style="margin:0 0 10px;font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};">Message</p>
+              <p style="margin:0 0 10px;font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};">Special notes / instructions</p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td bgcolor="${C.msgBg}" style="background:${C.msgBg};border-left:3px solid ${C.accent};border-radius:0 8px 8px 0;padding:16px 18px;font-family:${FONT};font-size:15px;line-height:1.7;color:${C.text};">${message}</td>
+                  <td bgcolor="${C.msgBg}" style="background:${C.msgBg};border-left:3px solid ${C.accent};border-radius:0 8px 8px 0;padding:16px 18px;font-family:${FONT};font-size:15px;line-height:1.7;color:${notes ? C.text : C.muted};">${notes || "None"}</td>
                 </tr>
               </table>
             </td>
@@ -197,19 +218,25 @@ function buildHtml(enquiry: ContactEnquiry, receivedAt: string) {
 }
 
 function buildText(enquiry: ContactEnquiry, receivedAt: string) {
-  const { name, email, phone, city, message } = enquiry;
+  const { name, email, phone, city, address, product, payment, notes } =
+    enquiry;
   return [
     "HAPPY HENS POULTRY",
-    "New website enquiry",
+    "New order request",
     `Received ${receivedAt} (PKT)`,
     "",
-    `Name:  ${name}`,
-    `Email: ${email}`,
-    `Phone: ${phone || "Not provided"}`,
-    `City:  ${city || "Not provided"}`,
+    `Product:       ${product}`,
+    `Delivery date: ${formatDeliveryDate(enquiry.deliveryDate)}`,
+    `Payment:       ${payment}`,
     "",
-    "Message:",
-    message,
+    `Name:      ${name}`,
+    `Telephone: ${phone}`,
+    `Email:     ${email}`,
+    `City:      ${city}`,
+    `Address:   ${address}`,
+    "",
+    "Special notes / instructions:",
+    notes || "None",
     "",
     "--",
     `Sent automatically by the contact form at ${SITE_URL}.`,
@@ -227,9 +254,9 @@ export async function sendContactEnquiry(enquiry: ContactEnquiry) {
 
   const resend = new Resend(apiKey);
   const receivedAt = formatReceivedAt(new Date());
-  const { name, city, email } = enquiry;
+  const { name, city, email, product } = enquiry;
 
-  const subject = `New enquiry from ${name}${city ? ` · ${city}` : ""}`;
+  const subject = `New order: ${product} · ${name} · ${city}`;
 
   const { error } = await resend.emails.send({
     from: FROM,

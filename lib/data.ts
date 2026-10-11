@@ -31,7 +31,7 @@ export const CONTACT = {
   phone2: "+92 321 7337 443",
   phone2Raw: "+923217337443",
   email: "sales@happyhenspoultry.com",
-  address: ["22-F, Raiwind Road,", "Lahore, Pakistan, 54000"],
+  address: ["Islamia Park,", "Lahore, Pakistan"],
   hours: "Mon – Sat · 8 AM – 6 PM",
   whatsapp: "https://wa.me/923297189007",
   facebook: "https://www.facebook.com/share/1NHEQuf74x/",

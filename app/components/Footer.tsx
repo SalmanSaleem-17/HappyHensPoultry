@@ -88,7 +88,7 @@ export default function Footer() {
               Get in Touch
             </h4>
             <ul className="space-y-2.5 text-foreground/80 text-[14px]">
-              <li>22-F, Raiwind Road, Lahore, Pakistan, 54000</li>
+              <li>{CONTACT.address.join(" ")}</li>
               <li>Farm: Jhang Sadar, Punjab</li>
               <li>
                 <a href={`tel:${CONTACT.phone1Raw}`} className="hover:text-accent transition-colors block">

@@ -1,12 +1,31 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { submitContact, type FormState } from "../actions";
+import { CITIES, PAYMENT_METHODS, PRODUCTS } from "../../lib/order";
 
 const initial: FormState = { status: "idle", message: "" };
 
+const labelClass =
+  "block text-[10px] uppercase tracking-[0.22em] font-semibold text-muted";
+const inputClass =
+  "w-full px-0 py-2.5 border-0 border-b border-border bg-transparent text-foreground placeholder:text-subtle focus:outline-none focus:border-accent transition-colors text-[15px]";
+
+/** Today's date as YYYY-MM-DD in the visitor's local time zone. */
+function todayISO() {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 export default function ContactForm() {
   const [state, formAction, pending] = useActionState(submitContact, initial);
+
+  // Applied after mount so server and client markup match during hydration.
+  const dateRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (dateRef.current) dateRef.current.min = todayISO();
+  }, []);
 
   return (
     <form action={formAction} className="relative space-y-6">
@@ -17,71 +36,148 @@ export default function ContactForm() {
         tabIndex={-1}
         autoComplete="off"
         aria-hidden="true"
-        className="absolute -left-[9999px] h-0 w-0 opacity-0"
+        className="absolute left-0 top-0 h-0 w-0 overflow-hidden opacity-0"
       />
+
       <div className="grid sm:grid-cols-2 gap-6">
         <Field
-          label="Full name"
+          label="Name"
           name="name"
           type="text"
-          placeholder="Your name"
+          placeholder="Your full name"
+          autoComplete="name"
           required
         />
+        <Field
+          label="Telephone"
+          name="phone"
+          type="tel"
+          placeholder="+92 300 0000000"
+          autoComplete="tel"
+          required
+        />
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-6">
         <Field
           label="Email"
           name="email"
           type="email"
           placeholder="you@example.com"
+          autoComplete="email"
           required
         />
-      </div>
-      <div className="grid sm:grid-cols-2 gap-6">
-        <Field
-          label="Phone"
-          name="phone"
-          type="tel"
-          placeholder="+92 300 0000000"
-        />
         <div className="space-y-2">
-          <label
-            htmlFor="city"
-            className="block text-[10px] uppercase tracking-[0.22em] font-semibold text-muted"
-          >
-            City
+          <label htmlFor="city" className={labelClass}>
+            City<Req />
           </label>
           <select
             id="city"
             name="city"
+            required
             defaultValue=""
-            className="w-full px-0 py-2.5 border-0 border-b border-border bg-transparent text-foreground focus:outline-none focus:border-accent transition-colors text-[15px]"
+            className={inputClass}
           >
             <option value="" disabled>
               Choose your city
             </option>
-            <option value="Lahore">Lahore</option>
-            <option value="Faisalabad">Faisalabad</option>
-            <option value="Islamabad">Islamabad</option>
-            <option value="Jhang">Jhang</option>
-            <option value="Other">Other</option>
+            {CITIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
       </div>
+
       <div className="space-y-2">
-        <label
-          htmlFor="message"
-          className="block text-[10px] uppercase tracking-[0.22em] font-semibold text-muted"
-        >
-          Message
+        <label htmlFor="address" className={labelClass}>
+          Complete delivery address<Req />
         </label>
         <textarea
-          id="message"
-          name="message"
-          rows={4}
+          id="address"
+          name="address"
+          rows={2}
           required
-          placeholder="How many trays do you need?"
-          className="w-full px-0 py-2.5 border-0 border-b border-border bg-transparent text-foreground placeholder:text-subtle focus:outline-none focus:border-accent transition-colors resize-none text-[15px]"
+          autoComplete="street-address"
+          placeholder="House / shop no., street, area, nearest landmark"
+          className={`${inputClass} resize-none`}
         />
       </div>
+
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label htmlFor="product" className={labelClass}>
+            Product order<Req />
+          </label>
+          <select
+            id="product"
+            name="product"
+            required
+            defaultValue=""
+            className={inputClass}
+          >
+            <option value="" disabled>
+              Choose a pack
+            </option>
+            {PRODUCTS.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="deliveryDate" className={labelClass}>
+            Delivery date<Req />
+          </label>
+          <input
+            id="deliveryDate"
+            name="deliveryDate"
+            type="date"
+            required
+            ref={dateRef}
+            className={`${inputClass} scheme-light dark:scheme-dark`}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="notes" className={labelClass}>
+          Special notes / instructions
+        </label>
+        <textarea
+          id="notes"
+          name="notes"
+          rows={3}
+          placeholder="Preferred delivery time, gate instructions, anything else we should know"
+          className={`${inputClass} resize-none`}
+        />
+      </div>
+
+      <fieldset className="space-y-3">
+        <legend className={labelClass}>
+          Payment<Req />
+        </legend>
+        <div className="flex flex-wrap gap-x-8 gap-y-3 pt-1">
+          {PAYMENT_METHODS.map((m, i) => (
+            <label
+              key={m}
+              className="inline-flex items-center gap-2.5 text-[15px] text-foreground cursor-pointer"
+            >
+              <input
+                type="radio"
+                name="payment"
+                value={m}
+                required
+                defaultChecked={i === 0}
+                className="h-4 w-4 accent-accent"
+              />
+              {m}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       {state.status !== "idle" && (
         <div
@@ -126,7 +222,7 @@ export default function ContactForm() {
             </>
           ) : (
             <>
-              Send message
+              Place order
               <svg
                 width="14"
                 height="14"
@@ -147,27 +243,30 @@ export default function ContactForm() {
   );
 }
 
+function Req() {
+  return <span className="text-accent ml-1">*</span>;
+}
+
 function Field({
   label,
   name,
   type,
   placeholder,
   required,
+  autoComplete,
 }: {
   label: string;
   name: string;
   type: string;
   placeholder?: string;
   required?: boolean;
+  autoComplete?: string;
 }) {
   return (
     <div className="space-y-2">
-      <label
-        htmlFor={name}
-        className="block text-[10px] uppercase tracking-[0.22em] font-semibold text-muted"
-      >
+      <label htmlFor={name} className={labelClass}>
         {label}
-        {required && <span className="text-accent ml-1">*</span>}
+        {required && <Req />}
       </label>
       <input
         id={name}
@@ -175,7 +274,8 @@ function Field({
         type={type}
         required={required}
         placeholder={placeholder}
-        className="w-full px-0 py-2.5 border-0 border-b border-border bg-transparent text-foreground placeholder:text-subtle focus:outline-none focus:border-accent transition-colors text-[15px]"
+        autoComplete={autoComplete}
+        className={inputClass}
       />
     </div>
   );
