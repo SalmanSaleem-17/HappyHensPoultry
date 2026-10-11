@@ -120,11 +120,26 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="py-7 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[12px] sm:text-[13px] text-muted">
-          <p>
-            &copy; {new Date().getFullYear()} Happy Hens Poultry · All
-            rights reserved
-          </p>
+        <div className="py-7 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] sm:text-[13px] text-muted">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
+            <p>
+              &copy; {new Date().getFullYear()} Happy Hens Poultry · All
+              rights reserved
+            </p>
+            <div className="inline-flex items-center gap-2.5">
+              <span className="uppercase tracking-[0.18em] text-[10px] font-semibold">
+                Powered by
+              </span>
+              <Image
+                src={IMG.poweredBy}
+                alt="3CORE Traders (Pvt) Ltd"
+                title="3CORE Traders (Private) Limited"
+                width={72}
+                height={67}
+                className="h-11 w-auto rounded-md bg-white p-0.5 object-contain"
+              />
+            </div>
+          </div>
           <div className="flex items-center gap-5 sm:gap-6">
             <a href="#" className="hover:text-accent transition-colors">Privacy</a>
             <a href="#" className="hover:text-accent transition-colors">Terms</a>

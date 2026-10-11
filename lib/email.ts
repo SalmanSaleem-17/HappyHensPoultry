@@ -156,7 +156,19 @@ function bankDetailsTable() {
     </table>`;
 }
 
-const POWERED_BY = `<br>Powered by ${COMPANY}.`;
+/** "Powered by 3CORE Traders" logo row, rendered under the footer text. */
+const POWERED_BY = `
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;">
+    <tr>
+      <td style="padding-right:12px;vertical-align:middle;">
+        <img src="${SITE_URL}/powered-by-3core.png" width="64" height="60" alt="3CORE Traders (Pvt) Ltd" style="display:block;width:64px;height:auto;border-radius:6px;background:#ffffff;">
+      </td>
+      <td style="vertical-align:middle;font-family:${FONT};font-size:11px;line-height:1.5;color:${C.muted};">
+        <span style="letter-spacing:.14em;text-transform:uppercase;font-weight:600;">Powered by</span><br>
+        <span style="font-size:13px;color:${C.text};font-weight:600;">${COMPANY}</span>
+      </td>
+    </tr>
+  </table>`;
 
 /** Shared outer shell: header band, white body sections, soft footer. */
 function shell(opts: {

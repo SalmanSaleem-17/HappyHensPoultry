@@ -2,6 +2,7 @@ export const IMG = {
   packaging:
     "https://res.cloudinary.com/dw6svuzvy/image/upload/v1779476573/packing_nzgmlo.png",
   icon: "/icon.png",
+  poweredBy: "/powered-by-3core.png",
   eggsCloseUp:
     "https://res.cloudinary.com/dw6svuzvy/image/upload/v1779475533/free-range-brown-eggs_twuqvn.png",
   eggsTray:
