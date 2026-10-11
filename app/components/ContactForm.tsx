@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { submitContact, type FormState } from "../actions";
 import {
   BANK,
-  CITIES,
+  CITY_GROUPS,
   MAX_RECEIPT_BYTES,
   PAYMENT_METHODS,
   PRODUCTS,
@@ -101,10 +101,14 @@ export default function ContactForm() {
             <option value="" disabled>
               Choose your city
             </option>
-            {CITIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+            {CITY_GROUPS.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.cities.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>

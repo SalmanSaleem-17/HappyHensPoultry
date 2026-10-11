@@ -2,6 +2,7 @@
 
 import { sendContactEnquiry, type Receipt } from "../lib/email";
 import {
+  CITIES,
   MAX_RECEIPT_BYTES,
   PAYMENT_METHODS,
   PRODUCTS,
@@ -55,6 +56,10 @@ export async function submitContact(
 
   if (phone.replace(/\D/g, "").length < 7) {
     return { status: "error", message: "Please enter a valid telephone number." };
+  }
+
+  if (!CITIES.includes(city)) {
+    return { status: "error", message: "Please choose your city from the list." };
   }
 
   if (!(PRODUCTS as readonly string[]).includes(product)) {
