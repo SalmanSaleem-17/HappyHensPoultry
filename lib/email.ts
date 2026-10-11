@@ -14,6 +14,8 @@ const FROM =
   process.env.RESEND_FROM ??
   "Happy Hens Website <website@happyhenspoultry.com>";
 
+const SITE_URL = "https://happyhenspoultry.com";
+
 export type ContactEnquiry = {
   name: string;
   email: string;
@@ -21,6 +23,8 @@ export type ContactEnquiry = {
   city: string;
   message: string;
 };
+
+/* ---------- helpers ---------- */
 
 function escapeHtml(value: string) {
   return value
@@ -30,12 +34,190 @@ function escapeHtml(value: string) {
     .replace(/"/g, "&quot;");
 }
 
-function row(label: string, value: string) {
-  return `<tr>
-    <td style="padding:8px 12px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b6b60;vertical-align:top;white-space:nowrap">${label}</td>
-    <td style="padding:8px 12px;font-size:15px;color:#1f261f">${value || "—"}</td>
-  </tr>`;
+/** "03451122333" / "+92 345 1122333" → "923451122333" for wa.me links. */
+function toWhatsAppNumber(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("92")) return digits;
+  if (digits.startsWith("0")) return `92${digits.slice(1)}`;
+  return digits;
 }
+
+function formatReceivedAt(date: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Karachi",
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+}
+
+/* ---------- template ---------- */
+
+const C = {
+  bg: "#eef0ea",
+  card: "#ffffff",
+  header: "#2d4a36",
+  headerSoft: "#dfe6dc",
+  text: "#1f261f",
+  muted: "#6b7268",
+  border: "#e3e6df",
+  accent: "#2d4a36",
+  msgBg: "#f6f7f3",
+};
+
+const FONT =
+  "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+
+function detailRow(label: string, valueHtml: string, last = false) {
+  const border = last ? "" : `border-bottom:1px solid ${C.border};`;
+  return `
+    <tr>
+      <td width="110" style="padding:12px 0;${border}font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};vertical-align:top;">${label}</td>
+      <td style="padding:12px 0;${border}font-family:${FONT};font-size:15px;line-height:1.5;color:${C.text};vertical-align:top;">${valueHtml || `<span style="color:${C.muted}">Not provided</span>`}</td>
+    </tr>`;
+}
+
+function button(href: string, label: string, primary = false) {
+  const bg = primary ? C.accent : C.card;
+  const color = primary ? "#ffffff" : C.accent;
+  const border = primary ? C.accent : C.border;
+  return `
+    <td style="padding:0 8px 8px 0;">
+      <a href="${href}" style="display:inline-block;padding:11px 18px;border-radius:999px;background:${bg};border:1px solid ${border};font-family:${FONT};font-size:13px;font-weight:600;color:${color};text-decoration:none;white-space:nowrap;">${label}</a>
+    </td>`;
+}
+
+function buildHtml(enquiry: ContactEnquiry, receivedAt: string) {
+  const name = escapeHtml(enquiry.name);
+  const email = escapeHtml(enquiry.email);
+  const phone = escapeHtml(enquiry.phone);
+  const city = escapeHtml(enquiry.city);
+  const message = escapeHtml(enquiry.message).replace(/\n/g, "<br>");
+  const wa = toWhatsAppNumber(enquiry.phone);
+
+  const buttons = [
+    button(`mailto:${email}`, "Reply by email", true),
+    phone ? button(`tel:${phone.replace(/\s/g, "")}`, "Call") : "",
+    wa ? button(`https://wa.me/${wa}`, "WhatsApp") : "",
+  ].join("");
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>New enquiry from ${name}</title>
+</head>
+<body style="margin:0;padding:0;background:${C.bg};" bgcolor="${C.bg}">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${name}${city ? ` from ${city}` : ""} sent a message through the website contact form.</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.bg}" style="background:${C.bg};">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+
+          <!-- Header -->
+          <tr>
+            <td bgcolor="${C.header}" style="background:${C.header};border-radius:12px 12px 0 0;padding:28px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-family:${FONT};font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:${C.headerSoft};font-weight:600;">Happy Hens Poultry</td>
+                </tr>
+                <tr>
+                  <td style="padding-top:10px;font-family:${FONT};font-size:24px;line-height:1.25;font-weight:700;color:#ffffff;">New website enquiry</td>
+                </tr>
+                <tr>
+                  <td style="padding-top:6px;font-family:${FONT};font-size:13px;color:${C.headerSoft};">Received ${receivedAt} (PKT)</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td bgcolor="${C.card}" style="background:${C.card};padding:28px 32px 8px;">
+              <p style="margin:0 0 18px;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};">
+                <strong>${name}</strong> filled in the contact form on
+                <a href="${SITE_URL}/contact" style="color:${C.accent};text-decoration:none;">happyhenspoultry.com</a>.
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${C.border};">
+                ${detailRow("Name", name)}
+                ${detailRow("Email", `<a href="mailto:${email}" style="color:${C.accent};text-decoration:none;">${email}</a>`)}
+                ${detailRow("Phone", phone ? `<a href="tel:${phone.replace(/\s/g, "")}" style="color:${C.accent};text-decoration:none;">${phone}</a>` : "")}
+                ${detailRow("City", city, true)}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Message -->
+          <tr>
+            <td bgcolor="${C.card}" style="background:${C.card};padding:8px 32px 24px;">
+              <p style="margin:0 0 10px;font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};">Message</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td bgcolor="${C.msgBg}" style="background:${C.msgBg};border-left:3px solid ${C.accent};border-radius:0 8px 8px 0;padding:16px 18px;font-family:${FONT};font-size:15px;line-height:1.7;color:${C.text};">${message}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Actions -->
+          <tr>
+            <td bgcolor="${C.card}" style="background:${C.card};padding:0 32px 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>${buttons}</tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td bgcolor="${C.headerSoft}" style="background:${C.headerSoft};border-radius:0 0 12px 12px;padding:18px 32px;font-family:${FONT};font-size:12px;line-height:1.6;color:${C.muted};">
+              Sent automatically by the contact form at
+              <a href="${SITE_URL}" style="color:${C.accent};text-decoration:none;">happyhenspoultry.com</a>.
+              Replying to this email goes straight to ${name}.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function buildText(enquiry: ContactEnquiry, receivedAt: string) {
+  const { name, email, phone, city, message } = enquiry;
+  return [
+    "HAPPY HENS POULTRY",
+    "New website enquiry",
+    `Received ${receivedAt} (PKT)`,
+    "",
+    `Name:  ${name}`,
+    `Email: ${email}`,
+    `Phone: ${phone || "Not provided"}`,
+    `City:  ${city || "Not provided"}`,
+    "",
+    "Message:",
+    message,
+    "",
+    "--",
+    `Sent automatically by the contact form at ${SITE_URL}.`,
+    `Reply to this email to respond directly to ${name}.`,
+  ].join("\n");
+}
+
+/* ---------- send ---------- */
 
 export async function sendContactEnquiry(enquiry: ContactEnquiry) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -44,45 +226,18 @@ export async function sendContactEnquiry(enquiry: ContactEnquiry) {
   }
 
   const resend = new Resend(apiKey);
-  const { name, email, phone, city, message } = enquiry;
+  const receivedAt = formatReceivedAt(new Date());
+  const { name, city, email } = enquiry;
 
-  const subject = `New enquiry from ${name}${city ? ` (${city})` : ""}`;
-
-  const text = [
-    "New enquiry from the Happy Hens website",
-    "",
-    `Name:    ${name}`,
-    `Email:   ${email}`,
-    `Phone:   ${phone || "—"}`,
-    `City:    ${city || "—"}`,
-    "",
-    "Message:",
-    message,
-  ].join("\n");
-
-  const html = `
-  <div style="font-family:Georgia,serif;background:#f5f2ea;padding:32px">
-    <div style="max-width:560px;margin:0 auto;background:#fffdf8;border:1px solid #e3ded0;padding:28px">
-      <p style="margin:0 0 4px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#2f5d3a">✦ Happy Hens Poultry</p>
-      <h1 style="margin:0 0 20px;font-size:24px;font-weight:500;color:#1f261f">New website enquiry</h1>
-      <table style="border-collapse:collapse;width:100%">
-        ${row("Name", escapeHtml(name))}
-        ${row("Email", `<a href="mailto:${escapeHtml(email)}" style="color:#2f5d3a">${escapeHtml(email)}</a>`)}
-        ${row("Phone", phone ? `<a href="tel:${escapeHtml(phone)}" style="color:#2f5d3a">${escapeHtml(phone)}</a>` : "")}
-        ${row("City", escapeHtml(city))}
-      </table>
-      <div style="margin-top:20px;padding:16px;background:#f5f2ea;border-left:3px solid #2f5d3a;font-size:15px;line-height:1.6;color:#1f261f;white-space:pre-wrap">${escapeHtml(message)}</div>
-      <p style="margin:24px 0 0;font-size:12px;color:#6b6b60">Reply to this email to respond directly to ${escapeHtml(name)}.</p>
-    </div>
-  </div>`;
+  const subject = `New enquiry from ${name}${city ? ` · ${city}` : ""}`;
 
   const { error } = await resend.emails.send({
     from: FROM,
     to: CONTACT_RECIPIENTS,
     replyTo: email,
     subject,
-    text,
-    html,
+    text: buildText(enquiry, receivedAt),
+    html: buildHtml(enquiry, receivedAt),
   });
 
   if (error) {
