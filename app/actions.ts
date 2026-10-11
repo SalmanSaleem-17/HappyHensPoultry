@@ -1,5 +1,7 @@
 "use server";
 
+import { sendContactEnquiry } from "../lib/email";
+
 export type FormState = {
   status: "idle" | "success" | "error";
   message: string;
@@ -27,13 +29,31 @@ export async function submitContact(
     return { status: "error", message: "That email doesn't look right." };
   }
 
-  console.log("[contact-form] new enquiry", {
-    name,
-    email,
-    phone,
-    city,
-    message,
-  });
+  // Honeypot: real users never fill this hidden field.
+  if (String(formData.get("company") ?? "").trim()) {
+    return {
+      status: "success",
+      message: "Thank you! Your message has been received.",
+    };
+  }
+
+  if (message.length > 5000) {
+    return {
+      status: "error",
+      message: "Please keep your message under 5000 characters.",
+    };
+  }
+
+  try {
+    await sendContactEnquiry({ name, email, phone, city, message });
+  } catch (err) {
+    console.error("[contact-form] failed to send enquiry", err);
+    return {
+      status: "error",
+      message:
+        "Sorry, we couldn't send your message right now. Please try again or WhatsApp us at +92 329 7189 007.",
+    };
+  }
 
   return {
     status: "success",

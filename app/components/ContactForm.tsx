@@ -9,7 +9,16 @@ export default function ContactForm() {
   const [state, formAction, pending] = useActionState(submitContact, initial);
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="relative space-y-6">
+      {/* Honeypot — hidden from humans, bots tend to fill it */}
+      <input
+        type="text"
+        name="company"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-0 w-0 opacity-0"
+      />
       <div className="grid sm:grid-cols-2 gap-6">
         <Field
           label="Full name"
