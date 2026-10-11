@@ -1,6 +1,11 @@
 import { Resend } from "resend";
 import { CONTACT } from "./data";
-import { formatDeliveryDate, type OrderEnquiry } from "./order";
+import {
+  BANK,
+  COMPANY,
+  formatDeliveryDate,
+  type OrderEnquiry,
+} from "./order";
 
 /** Where order requests are delivered. */
 export const CONTACT_RECIPIENTS = [
@@ -19,6 +24,19 @@ const FROM =
 const SITE_URL = "https://happyhenspoultry.com";
 
 export type ContactEnquiry = OrderEnquiry;
+
+/** Uploaded payment receipt, attached to the team notification. */
+export type Receipt = {
+  filename: string;
+  contentType: string;
+  content: Buffer;
+};
+
+function formatBytes(n: number) {
+  return n >= 1024 * 1024
+    ? `${(n / (1024 * 1024)).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(n / 1024))} KB`;
+}
 
 /* ---------- helpers ---------- */
 
@@ -127,6 +145,19 @@ function notesBlock(heading: string, notes: string) {
     </table>`;
 }
 
+function bankDetailsTable() {
+  const mono = `font-family:Consolas,'SF Mono',Menlo,monospace;letter-spacing:.04em;`;
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${C.border};">
+      ${detailRow("Bank", `${BANK.bank}, ${BANK.branch}`)}
+      ${detailRow("Title", BANK.title)}
+      ${detailRow("Account", `<span style="${mono}">${BANK.accountNumber}</span>`)}
+      ${detailRow("IBAN", `<span style="${mono}">${BANK.iban}</span>`, true)}
+    </table>`;
+}
+
+const POWERED_BY = `<br>Powered by ${COMPANY}.`;
+
 /** Shared outer shell: header band, white body sections, soft footer. */
 function shell(opts: {
   title: string;
@@ -205,7 +236,11 @@ function shell(opts: {
 
 /* ---------- 1. internal notification (to the team) ---------- */
 
-function buildTeamHtml(e: ContactEnquiry, receivedAt: string) {
+function buildTeamHtml(
+  e: ContactEnquiry,
+  receivedAt: string,
+  receipt?: Receipt
+) {
   const name = escapeHtml(e.name);
   const email = escapeHtml(e.email);
   const phone = escapeHtml(e.phone);
@@ -217,6 +252,13 @@ function buildTeamHtml(e: ContactEnquiry, receivedAt: string) {
   const notes = escapeHtml(e.notes).replace(/\n/g, "<br>");
   const wa = toWhatsAppNumber(e.phone);
   const tel = phone.replace(/\s/g, "");
+
+  const paymentNote =
+    e.payment === "Bank Transfer"
+      ? receipt
+        ? `Bank transfer. Receipt attached: <strong>${escapeHtml(receipt.filename)}</strong> (${formatBytes(receipt.content.length)}). Please verify the amount against the ${BANK.bank} account before dispatch.`
+        : `Bank transfer. <strong>No receipt attached yet.</strong> Share the total with the customer and ask for the transfer screenshot on WhatsApp.`
+      : "Cash on delivery.";
 
   return shell({
     title: "New order request",
@@ -238,6 +280,9 @@ function buildTeamHtml(e: ContactEnquiry, receivedAt: string) {
           ${detailRow("Address", address, true)}
         </table>`,
       notesBlock("Special notes / instructions", notes),
+      `
+        <p style="margin:0 0 10px;${label}">Payment</p>
+        <p style="margin:0;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};">${paymentNote}</p>`,
     ],
     buttons: [
       button(`mailto:${email}`, "Reply by email", true),
@@ -246,11 +291,21 @@ function buildTeamHtml(e: ContactEnquiry, receivedAt: string) {
     ].join(""),
     footer: `Sent automatically by the order form at
       <a href="${SITE_URL}" style="${link}">happyhenspoultry.com</a>.
-      Replying to this email goes straight to ${name}.`,
+      Replying to this email goes straight to ${name}.${POWERED_BY}`,
   });
 }
 
-function buildTeamText(e: ContactEnquiry, receivedAt: string) {
+function buildTeamText(
+  e: ContactEnquiry,
+  receivedAt: string,
+  receipt?: Receipt
+) {
+  const paymentLine =
+    e.payment === "Bank Transfer"
+      ? receipt
+        ? `Bank Transfer (receipt attached: ${receipt.filename})`
+        : "Bank Transfer (no receipt attached yet)"
+      : "Cash on delivery";
   return [
     "HAPPY HENS POULTRY",
     "New order request",
@@ -258,7 +313,7 @@ function buildTeamText(e: ContactEnquiry, receivedAt: string) {
     "",
     `Product:       ${e.product}`,
     `Delivery date: ${formatDeliveryDate(e.deliveryDate)}`,
-    `Payment:       ${e.payment}`,
+    `Payment:       ${paymentLine}`,
     "",
     `Name:      ${e.name}`,
     `Telephone: ${e.phone}`,
@@ -272,12 +327,17 @@ function buildTeamText(e: ContactEnquiry, receivedAt: string) {
     "--",
     `Sent automatically by the order form at ${SITE_URL}.`,
     `Reply to this email to respond directly to ${e.name}.`,
+    `Powered by ${COMPANY}.`,
   ].join("\n");
 }
 
 /* ---------- 2. confirmation (to the customer) ---------- */
 
-function buildCustomerHtml(e: ContactEnquiry, receivedAt: string) {
+function buildCustomerHtml(
+  e: ContactEnquiry,
+  receivedAt: string,
+  receipt?: Receipt
+) {
   const name = escapeHtml(e.name);
   const firstName = escapeHtml(e.name.split(/\s+/)[0] || e.name);
   const phone = escapeHtml(e.phone);
@@ -299,6 +359,23 @@ function buildCustomerHtml(e: ContactEnquiry, receivedAt: string) {
       </td>
     </tr>`;
 
+  const isBank = e.payment === "Bank Transfer";
+  const paymentSection = isBank
+    ? `
+        <p style="margin:0 0 6px;${label}">How to pay</p>
+        <p style="margin:0 0 12px;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};">
+          ${
+            receipt
+              ? `We've received your receipt (<strong>${escapeHtml(receipt.filename)}</strong>) and will verify it before dispatch.`
+              : `Once we confirm the total, transfer it to the account below and send us the receipt screenshot on WhatsApp or by replying to this email.`
+          }
+        </p>
+        ${bankDetailsTable()}`
+    : "";
+  const step3 = isBank
+    ? "Pay by bank transfer to the account above. Need to change anything? Just reply to this email."
+    : "Pay by cash when your eggs arrive. Need to change anything? Just reply to this email.";
+
   return shell({
     title: `Thanks for your order, ${firstName}!`,
     subtitle: `Received ${receivedAt} (PKT)`,
@@ -319,12 +396,13 @@ function buildCustomerHtml(e: ContactEnquiry, receivedAt: string) {
           ${detailRow("Address", address, true)}
         </table>`,
       notesBlock("Your notes", notes),
+      ...(paymentSection ? [paymentSection] : []),
       `
         <p style="margin:0 0 14px;${label}">What happens next</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           ${step(1, "We check availability", "Fresh eggs are packed to order, so we confirm stock for your date first.")}
           ${step(2, "We confirm with you", "Expect a call or WhatsApp message on " + phone + " with the final price and delivery time.")}
-          ${step(3, "Delivery on " + deliveryDate, `Pay by ${payment.toLowerCase()} on delivery. Need to change anything? Just reply to this email.`)}
+          ${step(3, "Delivery on " + deliveryDate, step3)}
         </table>`,
     ],
     buttons: [
@@ -336,11 +414,29 @@ function buildCustomerHtml(e: ContactEnquiry, receivedAt: string) {
       <a href="mailto:${CONTACT.email}" style="${link}">${CONTACT.email}</a> ·
       ${CONTACT.phone1}<br>
       You're receiving this because you placed an order request at
-      <a href="${SITE_URL}" style="${link}">happyhenspoultry.com</a>.`,
+      <a href="${SITE_URL}" style="${link}">happyhenspoultry.com</a>.${POWERED_BY}`,
   });
 }
 
-function buildCustomerText(e: ContactEnquiry, receivedAt: string) {
+function buildCustomerText(
+  e: ContactEnquiry,
+  receivedAt: string,
+  receipt?: Receipt
+) {
+  const bankLines =
+    e.payment === "Bank Transfer"
+      ? [
+          "How to pay:",
+          receipt
+            ? `We've received your receipt (${receipt.filename}) and will verify it before dispatch.`
+            : "Once we confirm the total, transfer it to the account below and send us the receipt on WhatsApp or by replying to this email.",
+          `Bank:    ${BANK.bank}, ${BANK.branch}`,
+          `Title:   ${BANK.title}`,
+          `Account: ${BANK.accountNumber}`,
+          `IBAN:    ${BANK.iban}`,
+          "",
+        ]
+      : [];
   return [
     "HAPPY HENS POULTRY",
     `Thanks for your order, ${e.name}!`,
@@ -351,7 +447,7 @@ function buildCustomerText(e: ContactEnquiry, receivedAt: string) {
     "",
     `Product:       ${e.product}`,
     `Delivery date: ${formatDeliveryDate(e.deliveryDate)}`,
-    `Payment:       ${e.payment} on delivery`,
+    `Payment:       ${e.payment}`,
     "",
     `Name:      ${e.name}`,
     `Telephone: ${e.phone}`,
@@ -361,6 +457,7 @@ function buildCustomerText(e: ContactEnquiry, receivedAt: string) {
     "Your notes:",
     e.notes || "None",
     "",
+    ...bankLines,
     "Need to change anything? Reply to this email or WhatsApp us:",
     CONTACT.whatsapp,
     "",
@@ -368,16 +465,22 @@ function buildCustomerText(e: ContactEnquiry, receivedAt: string) {
     `Happy Hens Poultry · ${CONTACT.address.join(" ")}`,
     `${CONTACT.email} · ${CONTACT.phone1}`,
     SITE_URL,
+    `Powered by ${COMPANY}.`,
   ].join("\n");
 }
 
 /* ---------- send ---------- */
 
 /**
- * Sends two emails in one batch: the order notification to the team and a
- * confirmation to the customer. Throws if Resend rejects the batch.
+ * Sends the order notification to the team (with the receipt attached, if
+ * any) and then a confirmation to the customer. Throws if the team email
+ * fails; a failed customer confirmation is logged but does not fail the order,
+ * since the team already has it.
  */
-export async function sendContactEnquiry(enquiry: ContactEnquiry) {
+export async function sendContactEnquiry(
+  enquiry: ContactEnquiry,
+  receipt?: Receipt
+) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     throw new Error("RESEND_API_KEY is not set");
@@ -387,26 +490,39 @@ export async function sendContactEnquiry(enquiry: ContactEnquiry) {
   const receivedAt = formatReceivedAt(new Date());
   const { name, city, email, product, deliveryDate } = enquiry;
 
-  const { error } = await resend.batch.send([
-    {
-      from: FROM,
-      to: CONTACT_RECIPIENTS,
-      replyTo: email,
-      subject: `New order: ${product} · ${name} · ${city}`,
-      text: buildTeamText(enquiry, receivedAt),
-      html: buildTeamHtml(enquiry, receivedAt),
-    },
-    {
-      from: FROM,
-      to: [email],
-      replyTo: CONTACT.email,
-      subject: `Your Happy Hens order request · ${product} for ${formatDeliveryDate(deliveryDate)}`,
-      text: buildCustomerText(enquiry, receivedAt),
-      html: buildCustomerHtml(enquiry, receivedAt),
-    },
-  ]);
+  const team = await resend.emails.send({
+    from: FROM,
+    to: CONTACT_RECIPIENTS,
+    replyTo: email,
+    subject: `New order: ${product} · ${name} · ${city}`,
+    text: buildTeamText(enquiry, receivedAt, receipt),
+    html: buildTeamHtml(enquiry, receivedAt, receipt),
+    attachments: receipt
+      ? [
+          {
+            filename: receipt.filename,
+            content: receipt.content,
+            contentType: receipt.contentType,
+          },
+        ]
+      : undefined,
+  });
+  if (team.error) {
+    throw new Error(`Resend: ${team.error.name} – ${team.error.message}`);
+  }
 
-  if (error) {
-    throw new Error(`Resend: ${error.name} – ${error.message}`);
+  const customer = await resend.emails.send({
+    from: FROM,
+    to: [email],
+    replyTo: CONTACT.email,
+    subject: `Your Happy Hens order request · ${product} for ${formatDeliveryDate(deliveryDate)}`,
+    text: buildCustomerText(enquiry, receivedAt, receipt),
+    html: buildCustomerHtml(enquiry, receivedAt, receipt),
+  });
+  if (customer.error) {
+    console.error(
+      "[contact-form] customer confirmation failed",
+      customer.error
+    );
   }
 }

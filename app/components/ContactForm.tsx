@@ -1,8 +1,16 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { submitContact, type FormState } from "../actions";
-import { CITIES, PAYMENT_METHODS, PRODUCTS } from "../../lib/order";
+import {
+  BANK,
+  CITIES,
+  MAX_RECEIPT_BYTES,
+  PAYMENT_METHODS,
+  PRODUCTS,
+  RECEIPT_ACCEPT,
+  type PaymentMethod,
+} from "../../lib/order";
 
 const initial: FormState = { status: "idle", message: "" };
 
@@ -20,12 +28,24 @@ function todayISO() {
 
 export default function ContactForm() {
   const [state, formAction, pending] = useActionState(submitContact, initial);
+  const [payment, setPayment] = useState<PaymentMethod>(PAYMENT_METHODS[0]);
+  const [receiptError, setReceiptError] = useState("");
 
   // Applied after mount so server and client markup match during hydration.
   const dateRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (dateRef.current) dateRef.current.min = todayISO();
   }, []);
+
+  function checkReceipt(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file && file.size > MAX_RECEIPT_BYTES) {
+      setReceiptError("That file is over 5 MB. Please choose a smaller image.");
+      e.target.value = "";
+    } else {
+      setReceiptError("");
+    }
+  }
 
   return (
     <form action={formAction} className="relative space-y-6">
@@ -160,7 +180,7 @@ export default function ContactForm() {
           Payment<Req />
         </legend>
         <div className="flex flex-wrap gap-x-8 gap-y-3 pt-1">
-          {PAYMENT_METHODS.map((m, i) => (
+          {PAYMENT_METHODS.map((m) => (
             <label
               key={m}
               className="inline-flex items-center gap-2.5 text-[15px] text-foreground cursor-pointer"
@@ -170,7 +190,8 @@ export default function ContactForm() {
                 name="payment"
                 value={m}
                 required
-                defaultChecked={i === 0}
+                checked={payment === m}
+                onChange={() => setPayment(m)}
                 className="h-4 w-4 accent-accent"
               />
               {m}
@@ -178,6 +199,53 @@ export default function ContactForm() {
           ))}
         </div>
       </fieldset>
+
+      {payment === "Bank Transfer" && (
+        <div className="border border-border bg-surface p-5 sm:p-6 space-y-5">
+          <p className="text-sm text-muted leading-relaxed">
+            Transfer to the account below. If you have already paid, attach a
+            screenshot of the receipt. Otherwise we&apos;ll confirm the total
+            first and you can send the receipt on WhatsApp.
+          </p>
+          <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-[14px]">
+            <BankRow label="Bank">
+              {BANK.bank}, {BANK.branch}
+            </BankRow>
+            <BankRow label="Account title">{BANK.title}</BankRow>
+            <BankRow label="Account number">
+              <span className="font-mono tracking-wide">
+                {BANK.accountNumber}
+              </span>
+            </BankRow>
+            <BankRow label="IBAN">
+              <span className="font-mono tracking-wide break-all">
+                {BANK.iban}
+              </span>
+            </BankRow>
+          </dl>
+          <div className="space-y-2">
+            <label htmlFor="receipt" className={labelClass}>
+              Payment receipt (screenshot)
+            </label>
+            <input
+              id="receipt"
+              name="receipt"
+              type="file"
+              accept={RECEIPT_ACCEPT}
+              onChange={checkReceipt}
+              className="block w-full text-[14px] text-foreground file:mr-4 file:rounded-full file:border file:border-border file:bg-background file:px-4 file:py-2 file:text-sm file:font-medium file:text-accent hover:file:border-accent file:cursor-pointer"
+            />
+            <p className="text-xs text-muted">
+              JPG, PNG, WebP or PDF, up to 5 MB. Optional.
+            </p>
+            {receiptError && (
+              <p className="text-xs text-red-700 dark:text-red-300">
+                {receiptError}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {state.status !== "idle" && (
         <div
@@ -245,6 +313,23 @@ export default function ContactForm() {
 
 function Req() {
   return <span className="text-accent ml-1">*</span>;
+}
+
+function BankRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <dt className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted mb-1">
+        {label}
+      </dt>
+      <dd className="text-foreground">{children}</dd>
+    </div>
+  );
 }
 
 function Field({

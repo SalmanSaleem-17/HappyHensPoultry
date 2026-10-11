@@ -1,9 +1,11 @@
 "use server";
 
-import { sendContactEnquiry } from "../lib/email";
+import { sendContactEnquiry, type Receipt } from "../lib/email";
 import {
+  MAX_RECEIPT_BYTES,
   PAYMENT_METHODS,
   PRODUCTS,
+  RECEIPT_TYPES,
   todayInPakistan,
   type PaymentMethod,
   type Product,
@@ -80,18 +82,48 @@ export async function submitContact(
     };
   }
 
+  // Optional payment receipt, only meaningful for bank transfers.
+  let receipt: Receipt | undefined;
+  const upload = formData.get("receipt");
+  if (
+    payment === "Bank Transfer" &&
+    upload instanceof File &&
+    upload.size > 0
+  ) {
+    if (!(RECEIPT_TYPES as readonly string[]).includes(upload.type)) {
+      return {
+        status: "error",
+        message: "The receipt must be a JPG, PNG, WebP image or a PDF.",
+      };
+    }
+    if (upload.size > MAX_RECEIPT_BYTES) {
+      return {
+        status: "error",
+        message: "The receipt file is over 5 MB. Please upload a smaller one.",
+      };
+    }
+    receipt = {
+      filename: upload.name || "receipt",
+      contentType: upload.type,
+      content: Buffer.from(await upload.arrayBuffer()),
+    };
+  }
+
   try {
-    await sendContactEnquiry({
-      name,
-      phone,
-      email,
-      city,
-      address,
-      product: product as Product,
-      deliveryDate,
-      notes,
-      payment: payment as PaymentMethod,
-    });
+    await sendContactEnquiry(
+      {
+        name,
+        phone,
+        email,
+        city,
+        address,
+        product: product as Product,
+        deliveryDate,
+        notes,
+        payment: payment as PaymentMethod,
+      },
+      receipt
+    );
   } catch (err) {
     console.error("[contact-form] failed to send enquiry", err);
     return {

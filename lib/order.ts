@@ -7,7 +7,7 @@ export const PRODUCTS = [
 ] as const;
 export type Product = (typeof PRODUCTS)[number];
 
-export const PAYMENT_METHODS = ["Cash", "Card"] as const;
+export const PAYMENT_METHODS = ["Cash", "Bank Transfer"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const CITIES = [
@@ -17,6 +17,28 @@ export const CITIES = [
   "Jhang",
   "Other",
 ] as const;
+
+/** Company that operates Happy Hens Poultry and receives payments. */
+export const COMPANY = "3CORE Traders (Private) Limited";
+
+/** Bank account for "Bank Transfer" payments. */
+export const BANK = {
+  bank: "Bank Alfalah",
+  branch: "Jail Road Branch, Lahore",
+  title: COMPANY,
+  accountNumber: "06121011431886",
+  iban: "PK43ALFH0612001011431886",
+} as const;
+
+/** Accepted payment-receipt uploads. */
+export const RECEIPT_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+] as const;
+export const RECEIPT_ACCEPT = RECEIPT_TYPES.join(",");
+export const MAX_RECEIPT_BYTES = 5 * 1024 * 1024; // 5 MB
 
 export type OrderEnquiry = {
   name: string;
