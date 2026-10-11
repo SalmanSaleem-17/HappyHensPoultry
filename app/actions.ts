@@ -184,7 +184,7 @@ export async function confirmPaymentVerified(
 
   return {
     status: "success",
-    message: `Payment for order ${result.payload.ref} marked as verified. ${result.payload.name} has been emailed at ${result.payload.email}, with a copy to sales@happyhenspoultry.com.`,
+    message: `Payment for order ${result.payload.ref} marked as verified. ${result.payload.name} has been emailed at ${result.payload.email}, and the team has been notified.`,
   };
 }
 

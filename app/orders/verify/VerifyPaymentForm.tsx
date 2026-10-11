@@ -43,8 +43,7 @@ export default function VerifyPaymentForm({ token }: { token: string }) {
         {pending ? "Sending confirmation…" : "✓ Confirm payment & email customer"}
       </button>
       <p className="text-xs text-muted">
-        This sends one email to the customer and a copy to
-        sales@happyhenspoultry.com. Press it once.
+        This emails the customer and notifies the whole team. Press it once.
       </p>
     </form>
   );

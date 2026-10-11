@@ -574,6 +574,81 @@ function buildVerifiedText(p: OrderTokenPayload, verifiedAt: string) {
   ].join("\n");
 }
 
+/* ---------- 4. payment verified (to the team) ---------- */
+
+function buildVerifiedTeamHtml(p: OrderTokenPayload, verifiedAt: string) {
+  const name = escapeHtml(p.name);
+  const email = escapeHtml(p.email);
+  const phone = escapeHtml(p.phone);
+  const city = escapeHtml(p.city);
+  const address = escapeHtml(p.address).replace(/\n/g, "<br>");
+  const product = escapeHtml(p.product);
+  const deliveryDate = escapeHtml(formatDeliveryDate(p.deliveryDate));
+  const wa = toWhatsAppNumber(p.phone);
+  const tel = phone.replace(/\s/g, "");
+
+  return shell({
+    title: `Payment verified · Order ${p.ref}`,
+    subtitle: `Verified ${verifiedAt} (PKT)`,
+    preheader: `${name}'s bank transfer for ${product} was verified. Deliver on ${deliveryDate}.`,
+    sections: [
+      `
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:18px;">
+          <tr>
+            <td style="padding:8px 14px;border-radius:999px;background:#e6f2ea;font-family:${FONT};font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${C.success};">✓ Ready to dispatch</td>
+          </tr>
+        </table>
+        <p style="${para}">
+          A team member marked the bank transfer for order
+          <strong>${p.ref}</strong> as verified. The customer has been sent
+          a confirmation. Please schedule delivery for
+          <strong>${deliveryDate}</strong>.
+        </p>
+        ${summaryCard(product, deliveryDate, "Bank transfer · Paid")}
+        <p style="margin:0 0 4px;${label}">Customer</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${C.border};">
+          ${detailRow("Name", name)}
+          ${detailRow("Telephone", `<a href="tel:${tel}" style="${link}">${phone}</a>`)}
+          ${detailRow("Email", `<a href="mailto:${email}" style="${link}">${email}</a>`)}
+          ${detailRow("City", city)}
+          ${detailRow("Address", address, true)}
+        </table>`,
+    ],
+    buttons: [
+      wa ? button(`https://wa.me/${wa}`, "WhatsApp customer", true) : "",
+      button(`tel:${tel}`, "Call"),
+      button(`mailto:${email}`, "Email"),
+    ].join(""),
+    footer: `Sent automatically when a payment is verified at
+      <a href="${SITE_URL}" style="${link}">happyhenspoultry.com</a>.`,
+  });
+}
+
+function buildVerifiedTeamText(p: OrderTokenPayload, verifiedAt: string) {
+  return [
+    "HAPPY HENS POULTRY",
+    `Payment verified · Order ${p.ref}`,
+    `Verified ${verifiedAt} (PKT)`,
+    "",
+    "A team member marked this bank transfer as verified. The customer has",
+    `been sent a confirmation. Please schedule delivery for ${formatDeliveryDate(p.deliveryDate)}.`,
+    "",
+    `Product:       ${p.product}`,
+    `Delivery date: ${formatDeliveryDate(p.deliveryDate)}`,
+    "Payment:       Bank transfer (paid)",
+    "",
+    `Name:      ${p.name}`,
+    `Telephone: ${p.phone}`,
+    `Email:     ${p.email}`,
+    `City:      ${p.city}`,
+    `Address:   ${p.address}`,
+    "",
+    "--",
+    `Sent automatically when a payment is verified at ${SITE_URL}.`,
+    `Powered by ${COMPANY}.`,
+  ].join("\n");
+}
+
 /* ---------- send ---------- */
 
 function client() {
@@ -659,22 +734,35 @@ export async function sendContactEnquiry(
 
 /**
  * Sent when the team presses "Verify payment" on a bank-transfer order.
- * Goes to the customer, with a copy to the sales inbox for the record.
+ * The customer gets a confirmation; the team gets a "ready to dispatch"
+ * notice. Throws if the customer email fails; a failed team notice is logged.
  */
 export async function sendPaymentVerifiedEmail(p: OrderTokenPayload) {
   const resend = client();
   const verifiedAt = formatReceivedAt(new Date());
+  const date = formatDeliveryDate(p.deliveryDate);
 
-  const { error } = await resend.emails.send({
+  const customer = await resend.emails.send({
     from: FROM,
     to: [p.email],
-    bcc: [CONTACT.email],
     replyTo: CONTACT.email,
-    subject: `Payment verified · Order ${p.ref} confirmed for ${formatDeliveryDate(p.deliveryDate)}`,
+    subject: `Payment verified · Order ${p.ref} confirmed for ${date}`,
     text: buildVerifiedText(p, verifiedAt),
     html: buildVerifiedHtml(p, verifiedAt),
   });
-  if (error) {
-    throw new Error(`Resend: ${error.name} – ${error.message}`);
+  if (customer.error) {
+    throw new Error(`Resend: ${customer.error.name} – ${customer.error.message}`);
+  }
+
+  const team = await resend.emails.send({
+    from: FROM,
+    to: CONTACT_RECIPIENTS,
+    replyTo: p.email,
+    subject: `Payment verified ${p.ref}: ${p.product} · ${p.name} · deliver ${date}`,
+    text: buildVerifiedTeamText(p, verifiedAt),
+    html: buildVerifiedTeamHtml(p, verifiedAt),
+  });
+  if (team.error) {
+    console.error("[verify-payment] team notice failed", team.error);
   }
 }
