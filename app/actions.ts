@@ -1,6 +1,11 @@
 "use server";
 
-import { sendContactEnquiry, type Receipt } from "../lib/email";
+import {
+  sendContactEnquiry,
+  sendPaymentVerifiedEmail,
+  type Receipt,
+} from "../lib/email";
+import { verifyOrderToken } from "../lib/verify-token";
 import {
   CITIES,
   MAX_RECEIPT_BYTES,
@@ -114,8 +119,9 @@ export async function submitContact(
     };
   }
 
+  let ref: string;
   try {
-    await sendContactEnquiry(
+    ref = await sendContactEnquiry(
       {
         name,
         phone,
@@ -140,8 +146,45 @@ export async function submitContact(
 
   return {
     status: "success",
-    message:
-      "Thank you! Your order request has been received. We'll confirm pricing and your delivery slot within one business day.",
+    message: `Thank you! Your order request ${ref} has been received and a confirmation is on its way to ${email}. We'll confirm pricing and your delivery slot within one business day.`,
+  };
+}
+
+/**
+ * Team-only: triggered from the "Verify payment" page linked in the
+ * bank-transfer notification email. Emails the customer that their payment
+ * was verified and the order is confirmed.
+ */
+export async function confirmPaymentVerified(
+  _prev: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const token = field(formData, "token");
+  const result = verifyOrderToken(token);
+  if (!result.ok) {
+    return {
+      status: "error",
+      message:
+        result.reason === "expired"
+          ? "This verification link has expired."
+          : "This verification link is not valid.",
+    };
+  }
+
+  try {
+    await sendPaymentVerifiedEmail(result.payload);
+  } catch (err) {
+    console.error("[verify-payment] failed to send confirmation", err);
+    return {
+      status: "error",
+      message:
+        "Couldn't send the confirmation email right now. Please try again in a minute.",
+    };
+  }
+
+  return {
+    status: "success",
+    message: `Payment for order ${result.payload.ref} marked as verified. ${result.payload.name} has been emailed at ${result.payload.email}, with a copy to sales@happyhenspoultry.com.`,
   };
 }
 

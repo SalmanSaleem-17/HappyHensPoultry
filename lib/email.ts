@@ -6,6 +6,11 @@ import {
   formatDeliveryDate,
   type OrderEnquiry,
 } from "./order";
+import {
+  makeOrderRef,
+  signOrderToken,
+  type OrderTokenPayload,
+} from "./verify-token";
 
 /** Where order requests are delivered. */
 export const CONTACT_RECIPIENTS = [
@@ -25,18 +30,12 @@ const SITE_URL = "https://happyhenspoultry.com";
 
 export type ContactEnquiry = OrderEnquiry;
 
-/** Uploaded payment receipt, attached to the team notification. */
+/** Uploaded payment receipt, attached to both order emails. */
 export type Receipt = {
   filename: string;
   contentType: string;
   content: Buffer;
 };
-
-function formatBytes(n: number) {
-  return n >= 1024 * 1024
-    ? `${(n / (1024 * 1024)).toFixed(1)} MB`
-    : `${Math.max(1, Math.round(n / 1024))} KB`;
-}
 
 /* ---------- helpers ---------- */
 
@@ -70,6 +69,12 @@ function formatReceivedAt(date: Date) {
   }).format(date);
 }
 
+function formatBytes(n: number) {
+  return n >= 1024 * 1024
+    ? `${(n / (1024 * 1024)).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(n / 1024))} KB`;
+}
+
 /* ---------- design tokens ---------- */
 
 const C = {
@@ -82,6 +87,7 @@ const C = {
   border: "#e3e6df",
   accent: "#2d4a36",
   msgBg: "#f6f7f3",
+  success: "#1f6b3a",
 };
 
 const FONT =
@@ -89,6 +95,7 @@ const FONT =
 
 const label = `font-family:${FONT};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${C.muted};`;
 const link = `color:${C.accent};text-decoration:none;`;
+const para = `margin:0 0 18px;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};`;
 
 /* ---------- building blocks ---------- */
 
@@ -170,6 +177,9 @@ const POWERED_BY = `
     </tr>
   </table>`;
 
+const CUSTOMER_FOOTER = `Happy Hens Poultry · Office: ${CONTACT.address.join(" ")} · Farm: ${CONTACT.farm.join(" ")}<br>
+  <a href="mailto:${CONTACT.email}" style="${link}">${CONTACT.email}</a> · ${CONTACT.phone1}`;
+
 /** Shared outer shell: header band, white body sections, soft footer. */
 function shell(opts: {
   title: string;
@@ -235,7 +245,7 @@ function shell(opts: {
 
           <!-- Footer -->
           <tr>
-            <td bgcolor="${C.headerSoft}" style="background:${C.headerSoft};border-radius:0 0 12px 12px;padding:18px 32px;font-family:${FONT};font-size:12px;line-height:1.6;color:${C.muted};">${opts.footer}</td>
+            <td bgcolor="${C.headerSoft}" style="background:${C.headerSoft};border-radius:0 0 12px 12px;padding:18px 32px;font-family:${FONT};font-size:12px;line-height:1.6;color:${C.muted};">${opts.footer}${POWERED_BY}</td>
           </tr>
 
         </table>
@@ -246,13 +256,19 @@ function shell(opts: {
 </html>`;
 }
 
+/* ---------- shared per-order context ---------- */
+
+type OrderCtx = {
+  ref: string;
+  receivedAt: string;
+  receipt?: Receipt;
+  /** Signed "Verify payment" link, bank transfers only. */
+  verifyUrl?: string;
+};
+
 /* ---------- 1. internal notification (to the team) ---------- */
 
-function buildTeamHtml(
-  e: ContactEnquiry,
-  receivedAt: string,
-  receipt?: Receipt
-) {
+function buildTeamHtml(e: ContactEnquiry, ctx: OrderCtx) {
   const name = escapeHtml(e.name);
   const email = escapeHtml(e.email);
   const phone = escapeHtml(e.phone);
@@ -264,21 +280,21 @@ function buildTeamHtml(
   const notes = escapeHtml(e.notes).replace(/\n/g, "<br>");
   const wa = toWhatsAppNumber(e.phone);
   const tel = phone.replace(/\s/g, "");
+  const isBank = e.payment === "Bank Transfer";
 
-  const paymentNote =
-    e.payment === "Bank Transfer"
-      ? receipt
-        ? `Bank transfer. Receipt attached: <strong>${escapeHtml(receipt.filename)}</strong> (${formatBytes(receipt.content.length)}). Please verify the amount against the ${BANK.bank} account before dispatch.`
-        : `Bank transfer. <strong>No receipt attached yet.</strong> Share the total with the customer and ask for the transfer screenshot on WhatsApp.`
-      : "Cash on delivery.";
+  const paymentNote = isBank
+    ? ctx.receipt
+      ? `Bank transfer. Receipt attached: <strong>${escapeHtml(ctx.receipt.filename)}</strong> (${formatBytes(ctx.receipt.content.length)}). Check the amount against the ${BANK.bank} account, then press <strong>Verify payment</strong> below to confirm the order and email the customer.`
+      : `Bank transfer. <strong>No receipt attached yet.</strong> Share the total with the customer and ask for the transfer screenshot on WhatsApp. Once the money is in, press <strong>Verify payment</strong> below to confirm the order and email the customer.`
+    : "Cash on delivery.";
 
   return shell({
     title: "New order request",
-    subtitle: `Received ${receivedAt} (PKT)`,
+    subtitle: `Order ${ctx.ref} · Received ${ctx.receivedAt} (PKT)`,
     preheader: `${product} for ${name} in ${city}, delivery ${deliveryDate}, ${payment}.`,
     sections: [
       `
-        <p style="margin:0 0 18px;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};">
+        <p style="${para}">
           <strong>${name}</strong> placed an order request on
           <a href="${SITE_URL}/contact" style="${link}">happyhenspoultry.com</a>.
         </p>
@@ -297,31 +313,30 @@ function buildTeamHtml(
         <p style="margin:0;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};">${paymentNote}</p>`,
     ],
     buttons: [
-      button(`mailto:${email}`, "Reply by email", true),
+      isBank && ctx.verifyUrl
+        ? button(ctx.verifyUrl, "✓ Verify payment", true)
+        : "",
+      button(`mailto:${email}`, "Reply by email", !(isBank && ctx.verifyUrl)),
       button(`tel:${tel}`, "Call"),
       wa ? button(`https://wa.me/${wa}`, "WhatsApp") : "",
     ].join(""),
     footer: `Sent automatically by the order form at
       <a href="${SITE_URL}" style="${link}">happyhenspoultry.com</a>.
-      Replying to this email goes straight to ${name}.${POWERED_BY}`,
+      Replying to this email goes straight to ${name}.`,
   });
 }
 
-function buildTeamText(
-  e: ContactEnquiry,
-  receivedAt: string,
-  receipt?: Receipt
-) {
-  const paymentLine =
-    e.payment === "Bank Transfer"
-      ? receipt
-        ? `Bank Transfer (receipt attached: ${receipt.filename})`
-        : "Bank Transfer (no receipt attached yet)"
-      : "Cash on delivery";
+function buildTeamText(e: ContactEnquiry, ctx: OrderCtx) {
+  const isBank = e.payment === "Bank Transfer";
+  const paymentLine = isBank
+    ? ctx.receipt
+      ? `Bank Transfer (receipt attached: ${ctx.receipt.filename})`
+      : "Bank Transfer (no receipt attached yet)"
+    : "Cash on delivery";
   return [
     "HAPPY HENS POULTRY",
     "New order request",
-    `Received ${receivedAt} (PKT)`,
+    `Order ${ctx.ref} · Received ${ctx.receivedAt} (PKT)`,
     "",
     `Product:       ${e.product}`,
     `Delivery date: ${formatDeliveryDate(e.deliveryDate)}`,
@@ -336,6 +351,13 @@ function buildTeamText(
     "Special notes / instructions:",
     e.notes || "None",
     "",
+    ...(isBank && ctx.verifyUrl
+      ? [
+          "Once the transfer is received, verify the payment and notify the customer here:",
+          ctx.verifyUrl,
+          "",
+        ]
+      : []),
     "--",
     `Sent automatically by the order form at ${SITE_URL}.`,
     `Reply to this email to respond directly to ${e.name}.`,
@@ -345,11 +367,7 @@ function buildTeamText(
 
 /* ---------- 2. confirmation (to the customer) ---------- */
 
-function buildCustomerHtml(
-  e: ContactEnquiry,
-  receivedAt: string,
-  receipt?: Receipt
-) {
+function buildCustomerHtml(e: ContactEnquiry, ctx: OrderCtx) {
   const name = escapeHtml(e.name);
   const firstName = escapeHtml(e.name.split(/\s+/)[0] || e.name);
   const phone = escapeHtml(e.phone);
@@ -359,6 +377,7 @@ function buildCustomerHtml(
   const deliveryDate = escapeHtml(formatDeliveryDate(e.deliveryDate));
   const payment = escapeHtml(e.payment);
   const notes = escapeHtml(e.notes).replace(/\n/g, "<br>");
+  const isBank = e.payment === "Bank Transfer";
 
   const step = (n: number, title: string, body: string) => `
     <tr>
@@ -371,33 +390,32 @@ function buildCustomerHtml(
       </td>
     </tr>`;
 
-  const isBank = e.payment === "Bank Transfer";
   const paymentSection = isBank
     ? `
         <p style="margin:0 0 6px;${label}">How to pay</p>
         <p style="margin:0 0 12px;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};">
           ${
-            receipt
-              ? `We've received your receipt (<strong>${escapeHtml(receipt.filename)}</strong>) and will verify it before dispatch.`
-              : `Once we confirm the total, transfer it to the account below and send us the receipt screenshot on WhatsApp or by replying to this email.`
+            ctx.receipt
+              ? `We've received your receipt (<strong>${escapeHtml(ctx.receipt.filename)}</strong>, attached to this email for your records). We'll verify it and send you a payment confirmation.`
+              : `Once we confirm the total, transfer it to the account below and send us the receipt screenshot on WhatsApp or by replying to this email. You'll get a confirmation email as soon as we verify the payment.`
           }
         </p>
         ${bankDetailsTable()}`
     : "";
   const step3 = isBank
-    ? "Pay by bank transfer to the account above. Need to change anything? Just reply to this email."
+    ? "We deliver after your transfer is verified. Need to change anything? Just reply to this email."
     : "Pay by cash when your eggs arrive. Need to change anything? Just reply to this email.";
 
   return shell({
     title: `Thanks for your order, ${firstName}!`,
-    subtitle: `Received ${receivedAt} (PKT)`,
+    subtitle: `Order ${ctx.ref} · Received ${ctx.receivedAt} (PKT)`,
     preheader: `We've received your request for ${product}, delivery ${deliveryDate}. We'll confirm within one business day.`,
     sections: [
       `
-        <p style="margin:0 0 18px;font-family:${FONT};font-size:15px;line-height:1.6;color:${C.text};">
+        <p style="${para}">
           Hi ${name}, we've received your order request. Our team will confirm
           availability, pricing and your delivery slot within one business day,
-          by phone or email.
+          by phone or email. Your order reference is <strong>${ctx.ref}</strong>.
         </p>
         ${summaryCard(product, deliveryDate, payment)}
         <p style="margin:0 0 4px;${label}">Delivery details</p>
@@ -422,25 +440,19 @@ function buildCustomerHtml(
       button(`tel:${CONTACT.phone1Raw}`, "Call us"),
       button(SITE_URL, "Visit website"),
     ].join(""),
-    footer: `Happy Hens Poultry · ${CONTACT.address.join(" ")} ·
-      <a href="mailto:${CONTACT.email}" style="${link}">${CONTACT.email}</a> ·
-      ${CONTACT.phone1}<br>
+    footer: `${CUSTOMER_FOOTER}<br>
       You're receiving this because you placed an order request at
-      <a href="${SITE_URL}" style="${link}">happyhenspoultry.com</a>.${POWERED_BY}`,
+      <a href="${SITE_URL}" style="${link}">happyhenspoultry.com</a>.`,
   });
 }
 
-function buildCustomerText(
-  e: ContactEnquiry,
-  receivedAt: string,
-  receipt?: Receipt
-) {
+function buildCustomerText(e: ContactEnquiry, ctx: OrderCtx) {
   const bankLines =
     e.payment === "Bank Transfer"
       ? [
           "How to pay:",
-          receipt
-            ? `We've received your receipt (${receipt.filename}) and will verify it before dispatch.`
+          ctx.receipt
+            ? `We've received your receipt (${ctx.receipt.filename}, attached). We'll verify it and send you a payment confirmation.`
             : "Once we confirm the total, transfer it to the account below and send us the receipt on WhatsApp or by replying to this email.",
           `Bank:    ${BANK.bank}, ${BANK.branch}`,
           `Title:   ${BANK.title}`,
@@ -452,7 +464,7 @@ function buildCustomerText(
   return [
     "HAPPY HENS POULTRY",
     `Thanks for your order, ${e.name}!`,
-    `Received ${receivedAt} (PKT)`,
+    `Order ${ctx.ref} · Received ${ctx.receivedAt} (PKT)`,
     "",
     "We've received your order request. Our team will confirm availability,",
     "pricing and your delivery slot within one business day, by phone or email.",
@@ -474,7 +486,87 @@ function buildCustomerText(
     CONTACT.whatsapp,
     "",
     "--",
-    `Happy Hens Poultry · ${CONTACT.address.join(" ")}`,
+    `Happy Hens Poultry · Office: ${CONTACT.address.join(" ")} · Farm: ${CONTACT.farm.join(" ")}`,
+    `${CONTACT.email} · ${CONTACT.phone1}`,
+    SITE_URL,
+    `Powered by ${COMPANY}.`,
+  ].join("\n");
+}
+
+/* ---------- 3. payment verified (to the customer) ---------- */
+
+function buildVerifiedHtml(p: OrderTokenPayload, verifiedAt: string) {
+  const name = escapeHtml(p.name);
+  const firstName = escapeHtml(p.name.split(/\s+/)[0] || p.name);
+  const phone = escapeHtml(p.phone);
+  const city = escapeHtml(p.city);
+  const address = escapeHtml(p.address).replace(/\n/g, "<br>");
+  const product = escapeHtml(p.product);
+  const deliveryDate = escapeHtml(formatDeliveryDate(p.deliveryDate));
+
+  return shell({
+    title: `Payment verified, ${firstName}. Your order is confirmed.`,
+    subtitle: `Order ${p.ref} · Verified ${verifiedAt} (PKT)`,
+    preheader: `We've received your bank transfer for ${product}. Delivery on ${deliveryDate}.`,
+    sections: [
+      `
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:18px;">
+          <tr>
+            <td style="padding:8px 14px;border-radius:999px;background:#e6f2ea;font-family:${FONT};font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${C.success};">✓ Payment received</td>
+          </tr>
+        </table>
+        <p style="${para}">
+          Hi ${name}, thank you. We've verified your bank transfer and your
+          order <strong>${p.ref}</strong> is now confirmed. Our team will
+          pack it fresh and deliver on <strong>${deliveryDate}</strong>.
+        </p>
+        ${summaryCard(product, deliveryDate, "Bank transfer · Paid")}
+        <p style="margin:0 0 4px;${label}">Delivery details</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${C.border};">
+          ${detailRow("Name", name)}
+          ${detailRow("Telephone", phone)}
+          ${detailRow("City", city)}
+          ${detailRow("Address", address, true)}
+        </table>
+        <p style="margin:18px 0 0;font-family:${FONT};font-size:14px;line-height:1.6;color:${C.muted};">
+          Need to change the delivery date or address? Reply to this email or
+          WhatsApp us and we'll sort it out.
+        </p>`,
+    ],
+    buttons: [
+      button(CONTACT.whatsapp, "WhatsApp us", true),
+      button(`tel:${CONTACT.phone1Raw}`, "Call us"),
+      button(SITE_URL, "Visit website"),
+    ].join(""),
+    footer: `${CUSTOMER_FOOTER}<br>
+      You're receiving this because you placed order ${p.ref} at
+      <a href="${SITE_URL}" style="${link}">happyhenspoultry.com</a>.`,
+  });
+}
+
+function buildVerifiedText(p: OrderTokenPayload, verifiedAt: string) {
+  return [
+    "HAPPY HENS POULTRY",
+    "Payment verified. Your order is confirmed.",
+    `Order ${p.ref} · Verified ${verifiedAt} (PKT)`,
+    "",
+    `Hi ${p.name}, thank you. We've verified your bank transfer and your order`,
+    `is now confirmed. We'll deliver on ${formatDeliveryDate(p.deliveryDate)}.`,
+    "",
+    `Product:       ${p.product}`,
+    `Delivery date: ${formatDeliveryDate(p.deliveryDate)}`,
+    "Payment:       Bank transfer (paid)",
+    "",
+    `Name:      ${p.name}`,
+    `Telephone: ${p.phone}`,
+    `City:      ${p.city}`,
+    `Address:   ${p.address}`,
+    "",
+    "Need to change anything? Reply to this email or WhatsApp us:",
+    CONTACT.whatsapp,
+    "",
+    "--",
+    `Happy Hens Poultry · Office: ${CONTACT.address.join(" ")} · Farm: ${CONTACT.farm.join(" ")}`,
     `${CONTACT.email} · ${CONTACT.phone1}`,
     SITE_URL,
     `Powered by ${COMPANY}.`,
@@ -483,41 +575,63 @@ function buildCustomerText(
 
 /* ---------- send ---------- */
 
+function client() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("RESEND_API_KEY is not set");
+  return new Resend(apiKey);
+}
+
 /**
- * Sends the order notification to the team (with the receipt attached, if
- * any) and then a confirmation to the customer. Throws if the team email
- * fails; a failed customer confirmation is logged but does not fail the order,
- * since the team already has it.
+ * Sends the order notification to the team and a confirmation to the
+ * customer, both with the receipt attached if one was uploaded. Throws if the
+ * team email fails; a failed customer confirmation is logged but does not
+ * fail the order, since the team already has it. Returns the order reference.
  */
 export async function sendContactEnquiry(
   enquiry: ContactEnquiry,
   receipt?: Receipt
 ) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY is not set");
+  const resend = client();
+  const now = new Date();
+  const ref = makeOrderRef(now);
+  const ctx: OrderCtx = { ref, receivedAt: formatReceivedAt(now), receipt };
+
+  if (enquiry.payment === "Bank Transfer") {
+    const token = signOrderToken({
+      v: 1,
+      ref,
+      name: enquiry.name,
+      email: enquiry.email,
+      phone: enquiry.phone,
+      city: enquiry.city,
+      address: enquiry.address,
+      product: enquiry.product,
+      deliveryDate: enquiry.deliveryDate,
+      iat: now.getTime(),
+    });
+    ctx.verifyUrl = `${SITE_URL}/orders/verify?token=${encodeURIComponent(token)}`;
   }
 
-  const resend = new Resend(apiKey);
-  const receivedAt = formatReceivedAt(new Date());
+  const attachments = receipt
+    ? [
+        {
+          filename: receipt.filename,
+          content: receipt.content,
+          contentType: receipt.contentType,
+        },
+      ]
+    : undefined;
+
   const { name, city, email, product, deliveryDate } = enquiry;
 
   const team = await resend.emails.send({
     from: FROM,
     to: CONTACT_RECIPIENTS,
     replyTo: email,
-    subject: `New order: ${product} · ${name} · ${city}`,
-    text: buildTeamText(enquiry, receivedAt, receipt),
-    html: buildTeamHtml(enquiry, receivedAt, receipt),
-    attachments: receipt
-      ? [
-          {
-            filename: receipt.filename,
-            content: receipt.content,
-            contentType: receipt.contentType,
-          },
-        ]
-      : undefined,
+    subject: `New order ${ref}: ${product} · ${name} · ${city}`,
+    text: buildTeamText(enquiry, ctx),
+    html: buildTeamHtml(enquiry, ctx),
+    attachments,
   });
   if (team.error) {
     throw new Error(`Resend: ${team.error.name} – ${team.error.message}`);
@@ -527,14 +641,39 @@ export async function sendContactEnquiry(
     from: FROM,
     to: [email],
     replyTo: CONTACT.email,
-    subject: `Your Happy Hens order request · ${product} for ${formatDeliveryDate(deliveryDate)}`,
-    text: buildCustomerText(enquiry, receivedAt, receipt),
-    html: buildCustomerHtml(enquiry, receivedAt, receipt),
+    subject: `Your Happy Hens order ${ref} · ${product} for ${formatDeliveryDate(deliveryDate)}`,
+    text: buildCustomerText(enquiry, ctx),
+    html: buildCustomerHtml(enquiry, ctx),
+    attachments,
   });
   if (customer.error) {
     console.error(
       "[contact-form] customer confirmation failed",
       customer.error
     );
+  }
+
+  return ref;
+}
+
+/**
+ * Sent when the team presses "Verify payment" on a bank-transfer order.
+ * Goes to the customer, with a copy to the sales inbox for the record.
+ */
+export async function sendPaymentVerifiedEmail(p: OrderTokenPayload) {
+  const resend = client();
+  const verifiedAt = formatReceivedAt(new Date());
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: [p.email],
+    bcc: [CONTACT.email],
+    replyTo: CONTACT.email,
+    subject: `Payment verified · Order ${p.ref} confirmed for ${formatDeliveryDate(p.deliveryDate)}`,
+    text: buildVerifiedText(p, verifiedAt),
+    html: buildVerifiedHtml(p, verifiedAt),
+  });
+  if (error) {
+    throw new Error(`Resend: ${error.name} – ${error.message}`);
   }
 }

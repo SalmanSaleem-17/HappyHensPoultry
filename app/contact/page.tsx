@@ -61,9 +61,9 @@ export default function ContactPage() {
                 </a>
               </ContactInfo>
               <ContactInfo label="Farm">
-                Jhang Sadar,
+                {CONTACT.farm[0]}
                 <br />
-                Punjab, Pakistan
+                {CONTACT.farm[1]}
               </ContactInfo>
               <ContactInfo label="Hours">{CONTACT.hours}</ContactInfo>
             </div>
